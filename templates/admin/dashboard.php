@@ -3,6 +3,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
 global $wpdb;
 
 $settings = get_option('wpmazic_settings', array());
@@ -39,32 +41,32 @@ foreach ($tracked_post_types as $tracked_type) {
     }
 }
 
-$post_type_placeholders = implode(', ', array_fill(0, count($tracked_post_types), '%s'));
 
-$count_with_meta_key = static function ($meta_key) use ($wpdb, $post_type_placeholders, $tracked_post_types) {
-    $sql = "
-        SELECT COUNT(DISTINCT p.ID)
+$count_with_meta_key = static function ($meta_key) use ($wpdb, $tracked_post_types) {
+    return (int) $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT COUNT(DISTINCT p.ID)
         FROM {$wpdb->posts} p
         INNER JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID
         WHERE p.post_status = 'publish'
-          AND p.post_type IN ({$post_type_placeholders})
+          AND p.post_type IN (" . implode(', ', array_fill(0, count($tracked_post_types), '%s')) . ")
           AND pm.meta_key = %s
-          AND pm.meta_value <> ''
-    ";
-
-    $params = array_merge($tracked_post_types, array((string) $meta_key));
-    return (int) $wpdb->get_var($wpdb->prepare($sql, $params));
+          AND pm.meta_value <> ''",
+            array_merge($tracked_post_types, array((string) $meta_key))
+        )
+    );
 };
 
 $with_title = $count_with_meta_key('_wpmazic_title');
 $with_description = $count_with_meta_key('_wpmazic_description');
-$with_focus = $count_with_meta_key('_wpmazic_focus_keyword');
+$with_focus = $count_with_meta_key('_wpmazic_keyword');
 
-$with_complete_meta_sql = "
-    SELECT COUNT(DISTINCT p.ID)
+$with_complete_meta = (int) $wpdb->get_var(
+    $wpdb->prepare(
+        "SELECT COUNT(DISTINCT p.ID)
     FROM {$wpdb->posts} p
     WHERE p.post_status = 'publish'
-      AND p.post_type IN ({$post_type_placeholders})
+      AND p.post_type IN (" . implode(', ', array_fill(0, count($tracked_post_types), '%s')) . ")
       AND EXISTS (
           SELECT 1
           FROM {$wpdb->postmeta} mt
@@ -78,11 +80,7 @@ $with_complete_meta_sql = "
           WHERE md.post_id = p.ID
             AND md.meta_key = %s
             AND md.meta_value <> ''
-      )
-";
-$with_complete_meta = (int) $wpdb->get_var(
-    $wpdb->prepare(
-        $with_complete_meta_sql,
+      )",
         array_merge($tracked_post_types, array('_wpmazic_title', '_wpmazic_description'))
     )
 );
@@ -96,34 +94,22 @@ $meta_coverage = $total_content > 0 ? round(($with_complete_meta / $total_conten
 $focus_coverage = $total_content > 0 ? round(($with_focus / $total_content) * 100, 1) : 0;
 $overall_score = $total_content > 0 ? round(($meta_coverage * 0.65) + ($focus_coverage * 0.35), 1) : 0;
 
-$table_exists = static function ($table_name) use ($wpdb) {
-    $found = $wpdb->get_var(
-        $wpdb->prepare(
-            'SHOW TABLES LIKE %s',
-            $table_name
-        )
-    );
-
-    return is_string($found) && $found === $table_name;
-};
-
-$redirects_table = wpmazic_seo_get_table_name( 'redirects' );
-$errors_table = wpmazic_seo_get_table_name( '404' );
-
-$redirects = $table_exists($redirects_table) ? (int) $wpdb->get_var("SELECT COUNT(*) FROM {$redirects_table}") : 0; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-$errors_404 = $table_exists($errors_table) ? (int) $wpdb->get_var("SELECT COUNT(*) FROM {$errors_table}") : 0; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$redirects = wpmazic_seo_count_table_rows( 'redirects' );
+$errors_404 = wpmazic_seo_count_table_rows( '404' );
 $crawl_labels = array();
 $crawl_values = array();
 
-if ($table_exists($errors_table)) {
+if ( wpmazic_seo_table_exists( '404' ) ) {
     $window_start = wp_date('Y-m-d 00:00:00', strtotime('-13 days', current_time('timestamp')));
-    $crawl_rows = $wpdb->get_results(
+    $errors_table = wpmazic_seo_get_table_name( '404' );
+    $crawl_rows   = $wpdb->get_results(
         $wpdb->prepare(
             "SELECT DATE(last_hit) AS day, COUNT(*) AS hits
-             FROM {$errors_table}
+             FROM %i
              WHERE last_hit >= %s
              GROUP BY DATE(last_hit)
              ORDER BY day ASC",
+            $errors_table,
             $window_start
         ),
         ARRAY_A
@@ -380,7 +366,7 @@ wpmazic_seo_admin_shell_open(
                 class="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-border tw-border-slate-200 tw-bg-white tw-px-3 tw-py-2">
                 <span class="tw-text-sm tw-text-slate-700"><?php echo esc_html($label); ?></span>
                 <span
-                    class="wmz-pill <?php echo $enabled ? '' : 'tw-border-slate-300 tw-bg-slate-100 tw-text-slate-600'; ?>">
+                    class="wmz-pill <?php echo esc_attr( $enabled ? '' : 'tw-border-slate-300 tw-bg-slate-100 tw-text-slate-600' ); ?>">
                     <?php echo esc_html($enabled ? __('Enabled', 'wpmazic-seo-lite') : __('Disabled', 'wpmazic-seo-lite')); ?>
                 </span>
             </div>

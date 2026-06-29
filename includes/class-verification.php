@@ -81,7 +81,7 @@ class WPMazic_Verification
             'wpmazic-ga4-gtag',
             esc_url($script_url),
             array(),
-            null,
+            WPMAZIC_SEO_VERSION,
             array(
                 'strategy' => 'async',
             )

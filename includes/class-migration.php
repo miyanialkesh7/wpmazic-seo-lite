@@ -323,6 +323,7 @@ class WPMazic_Migration {
             + ( isset( $stats['image_seo_keyword'] ) ? (int) $stats['image_seo_keyword'] : 0 );
 
         return sprintf(
+            /* translators: %1$d: scanned posts, %2$d: titles imported, %3$d: descriptions imported, %4$d: focus keywords imported, %5$d: canonical URLs imported, %6$d: robots flags imported, %7$d: social fields imported, %8$d: image SEO fields imported */
             __( 'Migration complete. Scanned: %1$d. Imported -> Title: %2$d, Description: %3$d, Focus Keyword: %4$d, Canonical: %5$d, Robots Flags: %6$d, Social Fields: %7$d, Image SEO Fields: %8$d.', 'wpmazic-seo-lite' ),
             isset( $stats['scanned'] ) ? (int) $stats['scanned'] : 0,
             isset( $stats['title'] ) ? (int) $stats['title'] : 0,

@@ -4,7 +4,7 @@
  * Plugin URI:  https://wordpress.org/plugins/search/wpmazic-seo-lite/
  * Description: Lightweight SEO suite with meta tags, schema, sitemap, redirects, 404 monitor, breadcrumbs, image SEO, IndexNow, and migration tools.
  * Version:     1.0.0
- * Author:      WPMazic Team
+ * Author:      WPMazic
  * Author URI:  https://wpmazic.com
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -74,6 +74,125 @@ if ( ! function_exists( 'wpmazic_seo_lite_render_notices' ) ) {
     }
 }
 
+if ( ! function_exists( 'wpmazic_seo_lite_is_verified_admin_post' ) ) {
+    /**
+     * True when an admin POST action was submitted and its nonce verified.
+     *
+     * @param string $post_key     POST field that indicates form submission.
+     * @param string $nonce_action Nonce action name.
+     * @return bool
+     */
+    function wpmazic_seo_lite_is_verified_admin_post( $post_key, $nonce_action ) {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified via check_admin_referer() before returning true.
+        if ( ! isset( $_POST[ $post_key ] ) ) {
+            return false;
+        }
+
+        check_admin_referer( $nonce_action );
+
+        return current_user_can( 'manage_options' );
+    }
+}
+
+if ( ! function_exists( 'wpmazic_seo_lite_get_post_value' ) ) {
+    /**
+     * Read a sanitized POST value. Caller must verify the nonce first.
+     *
+     * @param string $key                POST field name.
+     * @param string $sanitize_callback  Callable sanitize function.
+     * @param mixed  $default            Default when field is absent.
+     * @return mixed
+     */
+    function wpmazic_seo_lite_get_post_value( $key, $sanitize_callback = 'sanitize_text_field', $default = '' ) {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Caller verifies nonce; value is unslashed then sanitized below.
+        if ( ! isset( $_POST[ $key ] ) ) {
+            return $default;
+        }
+
+        $raw = wp_unslash( $_POST[ $key ] );
+
+        return call_user_func( $sanitize_callback, $raw );
+        // phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+    }
+}
+
+if ( ! function_exists( 'wpmazic_seo_lite_get_post_array' ) ) {
+    /**
+     * Read a sanitized POST array. Caller must verify the nonce first.
+     *
+     * @param string $key                POST field name.
+     * @param string $sanitize_callback  Callable sanitize function applied to each value.
+     * @return array
+     */
+    function wpmazic_seo_lite_get_post_array( $key, $sanitize_callback = 'sanitize_textarea_field' ) {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Caller verifies nonce; array is unslashed then sanitized below.
+        if ( ! isset( $_POST[ $key ] ) || ! is_array( $_POST[ $key ] ) ) {
+            return array();
+        }
+
+        $raw = wp_unslash( $_POST[ $key ] );
+
+        return map_deep( $raw, $sanitize_callback );
+        // phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+    }
+}
+
+if ( ! function_exists( 'wpmazic_seo_lite_post_flag' ) ) {
+    /**
+     * True when a POST checkbox/flag field is present and non-empty.
+     *
+     * Caller must verify the nonce first.
+     *
+     * @param string $key POST field name.
+     * @return bool
+     */
+    function wpmazic_seo_lite_post_flag( $key ) {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing -- Caller must verify nonce before calling.
+        $flag = isset( $_POST[ $key ] ) && '' !== sanitize_text_field( wp_unslash( $_POST[ $key ] ) );
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
+        return $flag;
+    }
+}
+
+if ( ! function_exists( 'wpmazic_seo_lite_get_get_value' ) ) {
+    /**
+     * Read a sanitized GET query value for read-only admin UI state.
+     *
+     * @param string $key                GET field name.
+     * @param string $sanitize_callback  Callable sanitize function.
+     * @param mixed  $default            Default when field is absent.
+     * @return mixed
+     */
+    function wpmazic_seo_lite_get_get_value( $key, $sanitize_callback = 'sanitize_text_field', $default = '' ) {
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only admin navigation; value is unslashed then sanitized below.
+        if ( ! isset( $_GET[ $key ] ) ) {
+            return $default;
+        }
+
+        $raw = wp_unslash( $_GET[ $key ] );
+
+        return call_user_func( $sanitize_callback, $raw );
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+    }
+}
+
+if ( ! function_exists( 'wpmazic_seo_lite_get_admin_page_query' ) ) {
+    /**
+     * Read the sanitized admin.php?page query value.
+     *
+     * @return string
+     */
+    function wpmazic_seo_lite_get_admin_page_query() {
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only admin navigation; screen access is capability-gated.
+        if ( ! isset( $_GET['page'] ) || ! is_scalar( $_GET['page'] ) ) {
+            return '';
+        }
+
+        return sanitize_key( sanitize_text_field( wp_unslash( (string) $_GET['page'] ) ) );
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
+    }
+}
+
 if ( ! function_exists( 'wpmazic_seo_lite_is_self_activation_request' ) ) {
     /**
      * Check whether this request is activating this plugin package.
@@ -85,8 +204,8 @@ if ( ! function_exists( 'wpmazic_seo_lite_is_self_activation_request' ) ) {
             return false;
         }
 
-        $action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
-        $plugin = isset( $_GET['plugin'] ) ? sanitize_text_field( wp_unslash( $_GET['plugin'] ) ) : '';
+        $action = wpmazic_seo_lite_get_get_value( 'action', 'sanitize_key', '' );
+        $plugin = wpmazic_seo_lite_get_get_value( 'plugin', 'sanitize_text_field', '' );
 
         return ( 'activate' === $action ) && ( plugin_basename( __FILE__ ) === $plugin );
     }
@@ -267,6 +386,82 @@ function wpmazic_seo_get_table_name( $table_key ) {
 }
 
 /**
+ * Return an allow-listed table name escaped for direct SQL interpolation.
+ *
+ * @param string $table_key Logical table key.
+ * @return string Escaped table name, or empty string when unavailable.
+ */
+function wpmazic_seo_get_sql_table_name( $table_key ) {
+    if ( ! wpmazic_seo_table_exists( $table_key ) ) {
+        return '';
+    }
+
+    return esc_sql( wpmazic_seo_get_table_name( $table_key ) );
+}
+
+/**
+ * Check whether a plugin-owned table exists in the database.
+ *
+ * @param string $table_key Logical table key.
+ * @return bool
+ */
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+function wpmazic_seo_table_exists( $table_key ) {
+    global $wpdb;
+
+    $table = wpmazic_seo_get_table_name( $table_key );
+    if ( '' === $table ) {
+        return false;
+    }
+
+    $found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+
+    return is_string( $found ) && $found === $table;
+}
+
+/**
+ * Count rows in a plugin-owned table resolved from an internal allow-list.
+ *
+ * @param string $table_key Logical table key.
+ * @return int
+ */
+function wpmazic_seo_count_table_rows( $table_key ) {
+    global $wpdb;
+
+    if ( ! wpmazic_seo_table_exists( $table_key ) ) {
+        return 0;
+    }
+
+    $table = wpmazic_seo_get_table_name( $table_key );
+
+    return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table ) );
+}
+
+/**
+ * Count rows in a plugin-owned table using a prepared WHERE clause.
+ *
+ * @param string       $table_key  Logical table key.
+ * @param string       $where_sql  SQL conditions with placeholders. Do not include "WHERE".
+ * @param array<mixed> $where_args Values for wpdb::prepare().
+ * @return int
+ */
+function wpmazic_seo_count_table_where( $table_key, $where_sql, $where_args = array() ) {
+    global $wpdb;
+
+    if ( ! wpmazic_seo_table_exists( $table_key ) || '' === trim( (string) $where_sql ) ) {
+        return 0;
+    }
+
+    $where_args = is_array( $where_args ) ? $where_args : array( $where_args );
+    $table      = wpmazic_seo_get_table_name( $table_key );
+
+    array_unshift( $where_args, $table );
+
+    // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter -- WHERE clause is internal and must include its own placeholders.
+    return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where_sql}", $where_args ) );
+}
+
+/**
  * Get a legacy custom table name used by older plugin versions.
  *
  * @param string $table_key Logical table key.
@@ -312,10 +507,13 @@ function wpmazic_seo_migrate_legacy_table_names() {
         $current_exists = ( $current_table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $current_table ) ) );
 
         if ( $legacy_exists && ! $current_exists ) {
-            $wpdb->query( "RENAME TABLE {$legacy_table} TO {$current_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            $wpdb->query(
+                $wpdb->prepare( 'RENAME TABLE %i TO %i', $legacy_table, $current_table )
+            );
         }
     }
 }
+// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 /**
  * Whether this WordPress.org package should enforce Lite-only restrictions.
@@ -565,8 +763,6 @@ if ( is_admin() ) {
 add_action(
     'init',
     function () {
-        load_plugin_textdomain( 'wpmazic-seo-lite', false, dirname( WPMAZIC_SEO_BASENAME ) . '/languages' );
-
         $settings = wpmazic_seo_get_settings();
 
         if ( class_exists( 'WPMazic_Security' ) ) {
@@ -714,8 +910,7 @@ if ( is_admin() ) {
                 return;
             }
 
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-            $page = isset( $_GET['page'] ) ? sanitize_key( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : '';
+            $page = wpmazic_seo_lite_get_admin_page_query();
             if ( 'wpmazic-seo-migration-wizard' === $page ) {
                 return;
             }
@@ -758,8 +953,7 @@ if ( is_admin() ) {
                 )
             );
 
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-            $page = isset( $_GET['page'] ) ? sanitize_key( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : '';
+            $page = wpmazic_seo_lite_get_admin_page_query();
             if ( in_array( $page, array( 'wpmazic-seo', 'wpmazic-seo-dashboard' ), true ) ) {
                 wp_enqueue_script(
                     'wpmazic-seo-lite-chartjs',
@@ -775,8 +969,7 @@ if ( is_admin() ) {
     add_filter(
         'admin_body_class',
         function ( $classes ) {
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-            $page = isset( $_GET['page'] ) ? sanitize_key( sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) : '';
+            $page = wpmazic_seo_lite_get_admin_page_query();
             if ( '' !== $page && false !== strpos( (string) $page, 'wpmazic-seo' ) ) {
                 $classes .= ' wpmazic-seo-admin';
             }
@@ -818,9 +1011,10 @@ function wpmazic_seo_admin_pages() {
  * @return string
  */
 function wpmazic_seo_admin_current_slug() {
-    $page = isset( $_GET['page'] ) && is_scalar( $_GET['page'] )
-        ? sanitize_key( wp_unslash( (string) $_GET['page'] ) )
-        : 'wpmazic-seo';
+    $page = wpmazic_seo_lite_get_admin_page_query();
+    if ( '' === $page ) {
+        $page = 'wpmazic-seo';
+    }
     if ( 'wpmazic-seo' === $page ) {
         return 'dashboard';
     }
@@ -954,7 +1148,7 @@ function wpmazic_seo_admin_shell_open( $title, $description = '' ) {
                                     class="wmz-shell-group-toggle"
                                     data-wmz-group-toggle
                                     data-panel="<?php echo esc_attr( $panel_id ); ?>"
-                                    aria-expanded="<?php echo $contains_current ? 'true' : 'false'; ?>"
+                                    aria-expanded="<?php echo esc_attr( $contains_current ? 'true' : 'false' ); ?>"
                                 >
                                     <span><?php echo esc_html( $group_label ); ?></span>
                                     <span class="wmz-shell-group-arrow" aria-hidden="true">&#9662;</span>
@@ -962,7 +1156,7 @@ function wpmazic_seo_admin_shell_open( $title, $description = '' ) {
                                 <ul
                                     id="<?php echo esc_attr( $panel_id ); ?>"
                                     class="wmz-shell-group-list"
-                                    <?php echo $contains_current ? '' : 'hidden'; ?>
+                                    <?php echo $contains_current ? '' : esc_attr( 'hidden' ); ?>
                                 >
                                     <?php foreach ( $slugs as $slug ) : ?>
                                         <?php

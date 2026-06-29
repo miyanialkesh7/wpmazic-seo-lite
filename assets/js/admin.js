@@ -248,108 +248,6 @@
         });
     }
 
-    function buildAnalyticsChart(canvasId, labels, datasets) {
-        if (!labels || !labels.length) {
-            return;
-        }
-
-        mountChart(canvasId, {
-            type: "line",
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: "bottom"
-                    }
-                },
-                interaction: {
-                    mode: "index",
-                    intersect: false
-                },
-                scales: {
-                    x: {
-                        ticks: { maxTicksLimit: 8 }
-                    },
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
-
-    function initAnalyticsCharts() {
-        var root = document.getElementById("wmz-analytics-charts");
-        var payload = parseJsonAttribute(root, "data-chart-payload");
-
-        if (!root || typeof window.Chart === "undefined") {
-            return;
-        }
-
-        buildAnalyticsChart("wmz-chart-gsc", payload.gsc && payload.gsc.labels ? payload.gsc.labels : [], [
-            {
-                label: "Clicks",
-                data: payload.gsc && payload.gsc.series && payload.gsc.series.clicks ? payload.gsc.series.clicks : [],
-                borderColor: "#0284c7",
-                backgroundColor: "rgba(2,132,199,0.12)",
-                borderWidth: 2,
-                tension: 0.25
-            },
-            {
-                label: "Impressions",
-                data: payload.gsc && payload.gsc.series && payload.gsc.series.impressions ? payload.gsc.series.impressions : [],
-                borderColor: "#38bdf8",
-                backgroundColor: "rgba(56,189,248,0.08)",
-                borderWidth: 2,
-                tension: 0.25
-            }
-        ]);
-
-        buildAnalyticsChart("wmz-chart-ga4", payload.ga4 && payload.ga4.labels ? payload.ga4.labels : [], [
-            {
-                label: "Sessions",
-                data: payload.ga4 && payload.ga4.series && payload.ga4.series.sessions ? payload.ga4.series.sessions : [],
-                borderColor: "#0ea5e9",
-                backgroundColor: "rgba(14,165,233,0.12)",
-                borderWidth: 2,
-                tension: 0.25
-            },
-            {
-                label: "Pageviews",
-                data: payload.ga4 && payload.ga4.series && payload.ga4.series.pageviews ? payload.ga4.series.pageviews : [],
-                borderColor: "#1d4ed8",
-                backgroundColor: "rgba(29,78,216,0.08)",
-                borderWidth: 2,
-                tension: 0.25
-            }
-        ]);
-
-        buildAnalyticsChart("wmz-chart-bing", payload.bing && payload.bing.labels ? payload.bing.labels : [], [
-            {
-                label: "Clicks",
-                data: payload.bing && payload.bing.series && payload.bing.series.clicks ? payload.bing.series.clicks : [],
-                borderColor: "#0369a1",
-                backgroundColor: "rgba(3,105,161,0.12)",
-                borderWidth: 2,
-                tension: 0.25
-            },
-            {
-                label: "Impressions",
-                data: payload.bing && payload.bing.series && payload.bing.series.impressions ? payload.bing.series.impressions : [],
-                borderColor: "#60a5fa",
-                backgroundColor: "rgba(96,165,250,0.08)",
-                borderWidth: 2,
-                tension: 0.25
-            }
-        ]);
-    }
-
     function getMetaboxConfig() {
         if (window.wpmazicSeoMetabox && typeof window.wpmazicSeoMetabox === "object") {
             return window.wpmazicSeoMetabox;
@@ -701,7 +599,6 @@
 
         syncShellSaveTrigger();
         initDashboardCharts();
-        initAnalyticsCharts();
         initMetabox();
 
         $(".wpmazic-seo-admin button").on("click", function (e) {

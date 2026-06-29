@@ -59,17 +59,19 @@ class WPMazic_Author_SEO {
             return;
         }
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce value is verified immediately below.
         $nonce = isset( $_POST['wpmazic_author_seo_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['wpmazic_author_seo_nonce'] ) ) : '';
         if ( ! wp_verify_nonce( $nonce, 'wpmazic_author_seo_profile' ) ) {
             return;
         }
 
+        // phpcs:disable WordPress.Security.NonceVerification.Missing
         $job_title = isset( $_POST['wpmazic_author_job_title'] ) ? sanitize_text_field( wp_unslash( $_POST['wpmazic_author_job_title'] ) ) : '';
         $expertise = isset( $_POST['wpmazic_author_expertise'] ) ? sanitize_text_field( wp_unslash( $_POST['wpmazic_author_expertise'] ) ) : '';
         $sameas    = '';
 
         if ( isset( $_POST['wpmazic_author_sameas'] ) ) {
-            $sameas_lines = preg_split( '/\r\n|\r|\n/', (string) wp_unslash( $_POST['wpmazic_author_sameas'] ) );
+            $sameas_lines = preg_split( '/\r\n|\r|\n/', sanitize_textarea_field( wp_unslash( $_POST['wpmazic_author_sameas'] ) ) );
             if ( is_array( $sameas_lines ) ) {
                 $clean_sameas = array();
                 foreach ( $sameas_lines as $line ) {
@@ -88,5 +90,6 @@ class WPMazic_Author_SEO {
         update_user_meta( $user_id, 'wpmazic_author_job_title', $job_title );
         update_user_meta( $user_id, 'wpmazic_author_expertise', $expertise );
         update_user_meta( $user_id, 'wpmazic_author_sameas', $sameas );
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
     }
 }

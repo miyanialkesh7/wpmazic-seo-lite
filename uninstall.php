@@ -9,6 +9,8 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+
 /**
  * Remove plugin data for a single site.
  *
@@ -28,19 +30,18 @@ function wpmazic_seo_lite_uninstall_site_data() {
 	$postmeta_like = $wpdb->esc_like( '_wpmazic_' ) . '%';
 
 	$wpdb->query(
-		"DELETE FROM {$wpdb->options}
-		WHERE option_name LIKE '_transient_wpmazic\_%'
-		   OR option_name LIKE '_transient_timeout_wpmazic\_%'" // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->prepare(
+			"DELETE FROM {$wpdb->options}
+		WHERE option_name LIKE %s
+		   OR option_name LIKE %s",
+			$wpdb->esc_like( '_transient_wpmazic_' ) . '%',
+			$wpdb->esc_like( '_transient_timeout_wpmazic_' ) . '%'
+		)
 	);
 
-	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wpmazic_seo_redirects" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wpmazic_seo_404" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wpmazic_seo_links" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wpmazic_seo_indexnow" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wpmazic_redirects" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wpmazic_404" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wpmazic_links" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}wpmazic_indexnow" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	foreach ( array( 'wpmazic_seo_redirects', 'wpmazic_seo_404', 'wpmazic_seo_links', 'wpmazic_seo_indexnow', 'wpmazic_redirects', 'wpmazic_404', 'wpmazic_links', 'wpmazic_indexnow' ) as $table_name ) {
+		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->prefix . $table_name ) );
+	}
 
 	$wpdb->query(
 		$wpdb->prepare(

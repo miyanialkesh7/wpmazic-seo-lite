@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
 class WPMazic_Redirects {
 
     public function __construct() {
@@ -35,10 +37,15 @@ class WPMazic_Redirects {
             $path = '/';
         }
 
+        if ( ! wpmazic_seo_table_exists( 'redirects' ) ) {
+            return;
+        }
+
         $table    = wpmazic_seo_get_table_name( 'redirects' );
         $redirect = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM {$table} WHERE status = %s AND source = %s LIMIT 1",
+                'SELECT * FROM %i WHERE status = %s AND source = %s LIMIT 1',
+                $table,
                 'active',
                 $path
             )
@@ -48,7 +55,8 @@ class WPMazic_Redirects {
             // Fallback: regex rules stored as source prefixed with "regex:".
             $regex_rules = $wpdb->get_results(
                 $wpdb->prepare(
-                    "SELECT * FROM {$table} WHERE status = %s AND source LIKE %s ORDER BY id DESC LIMIT 200",
+                    'SELECT * FROM %i WHERE status = %s AND source LIKE %s ORDER BY id DESC LIMIT 200',
+                    $table,
                     'active',
                     'regex:%'
                 )
@@ -80,7 +88,8 @@ class WPMazic_Redirects {
 
         $wpdb->query(
             $wpdb->prepare(
-                "UPDATE {$table} SET hits = hits + 1 WHERE id = %d",
+                'UPDATE %i SET hits = hits + 1 WHERE id = %d',
+                $table,
                 (int) $redirect->id
             )
         );
@@ -153,11 +162,16 @@ class WPMazic_Redirects {
         }
 
         global $wpdb;
-        $table = wpmazic_seo_get_table_name( 'redirects' );
+        $table_raw = wpmazic_seo_get_table_name( 'redirects' );
+        if ( '' === $table_raw || ! wpmazic_seo_table_exists( 'redirects' ) ) {
+            return;
+        }
 
+        $table  = $table_raw;
         $exists = $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT id FROM {$table} WHERE source = %s AND status = %s LIMIT 1",
+                'SELECT id FROM %i WHERE source = %s AND status = %s LIMIT 1',
+                $table,
                 $old_path,
                 'active'
             )
@@ -168,7 +182,7 @@ class WPMazic_Redirects {
         }
 
         $wpdb->insert(
-            $table,
+            $table_raw,
             array(
                 'source' => substr( (string) $old_path, 0, 500 ),
                 'target' => substr( esc_url_raw( $new_url ), 0, 500 ),

@@ -187,8 +187,11 @@ class WPMazic_Meta_Tags {
         }
 
         if (is_search()) {
-            /* translators: %s: search query */
-            return sprintf(__('Search Results for &#8220;%s&#8221;', 'wpmazic-seo-lite'), get_search_query()) . ' ' . $sep . ' ' . $site_name;
+            return sprintf(
+                /* translators: %s: search query */
+                __( 'Search Results for &#8220;%s&#8221;', 'wpmazic-seo-lite' ),
+                get_search_query()
+            ) . ' ' . $sep . ' ' . $site_name;
         }
 
         if (is_404()) {

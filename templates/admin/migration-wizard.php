@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
 if ( ! current_user_can( 'manage_options' ) ) {
     wp_die( esc_html__( 'You are not allowed to access this page.', 'wpmazic-seo-lite' ) );
 }
@@ -19,7 +21,7 @@ $skip_url      = wp_nonce_url(
     'wpmazic_skip_migration_wizard'
 );
 
-if ( isset( $_GET['skip'] ) && check_admin_referer( 'wpmazic_skip_migration_wizard' ) ) {
+if ( 1 === (int) wpmazic_seo_lite_get_get_value( 'skip', 'absint', 0 ) && check_admin_referer( 'wpmazic_skip_migration_wizard' ) ) {
     delete_option( 'wpmazic_show_migration_wizard' );
     update_option( 'wpmazic_migration_wizard_completed', current_time( 'mysql' ) );
     wp_safe_redirect( $dashboard_url );
@@ -29,27 +31,18 @@ if ( isset( $_GET['skip'] ) && check_admin_referer( 'wpmazic_skip_migration_wiza
 $sources  = class_exists( 'WPMazic_Migration' ) ? WPMazic_Migration::get_supported_sources() : array();
 $detected = class_exists( 'WPMazic_Migration' ) ? WPMazic_Migration::get_detected_sources() : array();
 
-$request_flag = static function ( $key, $default = false ) {
-    if ( ! isset( $_REQUEST[ $key ] ) ) {
-        return (bool) $default;
-    }
-
-    return '' !== sanitize_text_field( wp_unslash( $_REQUEST[ $key ] ) );
-};
-
-$step            = isset( $_REQUEST['step'] ) ? absint( wp_unslash( $_REQUEST['step'] ) ) : 1;
+$step            = (int) wpmazic_seo_lite_get_get_value( 'step', 'absint', 1 );
 $step            = min( 4, max( 1, $step ) );
-$selected_source_raw = isset( $_REQUEST['source'] ) ? wp_unslash( $_REQUEST['source'] ) : 'auto';
-$selected_source     = is_scalar( $selected_source_raw ) ? sanitize_key( (string) $selected_source_raw ) : 'auto';
+$selected_source = (string) wpmazic_seo_lite_get_get_value( 'source', 'sanitize_key', 'auto' );
 if ( ! isset( $sources[ $selected_source ] ) ) {
     $selected_source = 'auto';
 }
 
-$overwrite        = $request_flag( 'overwrite' );
-$include_social   = $request_flag( 'include_social', true );
-$include_robots   = $request_flag( 'include_robots', true );
-$include_advanced = $request_flag( 'include_advanced_robots', true );
-$include_image_seo = $request_flag( 'include_image_seo', true );
+$overwrite         = false;
+$include_social    = true;
+$include_robots    = true;
+$include_advanced  = true;
+$include_image_seo = true;
 
 $result_key = 'wpmazic_migration_wizard_result_' . get_current_user_id();
 $result     = get_transient( $result_key );
@@ -57,20 +50,19 @@ if ( ! is_array( $result ) ) {
     $result = array();
 }
 
-if ( isset( $_POST['wpmazic_run_migration'] ) && check_admin_referer( 'wpmazic_run_migration' ) ) {
-    $run_source_raw = isset( $_POST['source'] ) ? wp_unslash( $_POST['source'] ) : 'auto';
-    $run_source     = is_scalar( $run_source_raw ) ? sanitize_key( (string) $run_source_raw ) : 'auto';
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_run_migration', 'wpmazic_run_migration' ) ) {
+    $run_source = (string) wpmazic_seo_lite_get_post_value( 'source', 'sanitize_key', 'auto' );
     if ( ! isset( $sources[ $run_source ] ) ) {
         $run_source = 'auto';
     }
 
     $run_args = array(
         'source'                  => $run_source,
-        'overwrite'               => ! empty( $_POST['overwrite'] ),
-        'include_social'          => ! empty( $_POST['include_social'] ),
-        'include_robots'          => ! empty( $_POST['include_robots'] ),
-        'include_advanced_robots' => ! empty( $_POST['include_advanced_robots'] ),
-        'include_image_seo'       => ! empty( $_POST['include_image_seo'] ),
+        'overwrite'               => wpmazic_seo_lite_post_flag( 'overwrite' ),
+        'include_social'          => wpmazic_seo_lite_post_flag( 'include_social' ),
+        'include_robots'          => wpmazic_seo_lite_post_flag( 'include_robots' ),
+        'include_advanced_robots' => wpmazic_seo_lite_post_flag( 'include_advanced_robots' ),
+        'include_image_seo'       => wpmazic_seo_lite_post_flag( 'include_image_seo' ),
     );
 
     if ( class_exists( 'WPMazic_Migration' ) ) {

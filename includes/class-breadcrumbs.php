@@ -117,7 +117,11 @@ class WPMazic_Breadcrumbs {
 
         if ( is_search() ) {
             $crumbs[] = array(
-                'label' => sprintf( __( 'Search: %s', 'wpmazic-seo-lite' ), get_search_query() ),
+                'label' => sprintf(
+                    /* translators: %s: search query */
+                    __( 'Search: %s', 'wpmazic-seo-lite' ),
+                    get_search_query()
+                ),
                 'url'   => get_search_link(),
             );
             return $crumbs;

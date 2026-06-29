@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
 $settings         = get_option( 'wpmazic_settings', array() );
 $default_settings = function_exists( 'wpmazic_seo_get_default_settings' ) ? wpmazic_seo_get_default_settings() : array();
 
@@ -32,7 +34,10 @@ wpmazic_seo_admin_shell_open(
 );
 ?>
 
-<?php if ( isset( $_GET['settings-updated'] ) ) : ?>
+<?php
+$settings_updated = (string) wpmazic_seo_lite_get_get_value( 'settings-updated', 'sanitize_text_field', '' );
+?>
+<?php if ( '' !== $settings_updated ) : ?>
     <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Settings saved successfully.', 'wpmazic-seo-lite' ); ?></p></div>
 <?php endif; ?>
 
@@ -210,12 +215,42 @@ wpmazic_seo_admin_shell_open(
             <div class="wmz-field">
                 <label for="title_template_singular"><?php esc_html_e( 'Default Singular Title Template', 'wpmazic-seo-lite' ); ?></label>
                 <input class="wmz-input" type="text" id="title_template_singular" name="wpmazic_settings[title_template_singular]" value="<?php echo esc_attr( isset( $settings['title_template_singular'] ) ? $settings['title_template_singular'] : '%title% %sep% %sitename%' ); ?>">
-                <p class="wmz-help"><?php esc_html_e( 'Variables: %title%, %sitename%, %sep%, %excerpt%, %primary_keyword%, %post_type%, %category%, %date%, %author%', 'wpmazic-seo-lite' ); ?></p>
+                <p class="wmz-help"><?php
+                echo esc_html(
+                    sprintf(
+                        /* translators: 1: title variable, 2: sitename variable, 3: separator variable, 4: excerpt variable, 5: primary keyword variable, 6: post type variable, 7: category variable, 8: date variable, 9: author variable */
+                        __( 'Variables: %1$s, %2$s, %3$s, %4$s, %5$s, %6$s, %7$s, %8$s, %9$s', 'wpmazic-seo-lite' ),
+                        '%title%',
+                        '%sitename%',
+                        '%sep%',
+                        '%excerpt%',
+                        '%primary_keyword%',
+                        '%post_type%',
+                        '%category%',
+                        '%date%',
+                        '%author%'
+                    )
+                );
+                ?></p>
             </div>
             <div class="wmz-field">
                 <label for="description_template_singular"><?php esc_html_e( 'Default Singular Description Template', 'wpmazic-seo-lite' ); ?></label>
                 <input class="wmz-input" type="text" id="description_template_singular" name="wpmazic_settings[description_template_singular]" value="<?php echo esc_attr( isset( $settings['description_template_singular'] ) ? $settings['description_template_singular'] : '%excerpt%' ); ?>">
-                <p class="wmz-help"><?php esc_html_e( 'Variables: %excerpt%, %title%, %sitename%, %primary_keyword%, %category%, %date%, %author%', 'wpmazic-seo-lite' ); ?></p>
+                <p class="wmz-help"><?php
+                echo esc_html(
+                    sprintf(
+                        /* translators: 1: excerpt variable, 2: title variable, 3: sitename variable, 4: primary keyword variable, 5: category variable, 6: date variable, 7: author variable */
+                        __( 'Variables: %1$s, %2$s, %3$s, %4$s, %5$s, %6$s, %7$s', 'wpmazic-seo-lite' ),
+                        '%excerpt%',
+                        '%title%',
+                        '%sitename%',
+                        '%primary_keyword%',
+                        '%category%',
+                        '%date%',
+                        '%author%'
+                    )
+                );
+                ?></p>
             </div>
         </div>
     </div>
@@ -357,7 +392,18 @@ wpmazic_seo_admin_shell_open(
             <div class="wmz-field">
                 <label for="rss_before_content"><?php esc_html_e( 'RSS Content Before Post', 'wpmazic-seo-lite' ); ?></label>
                 <textarea class="wmz-textarea" id="rss_before_content" name="wpmazic_settings[rss_before_content]" rows="4"><?php echo esc_textarea( isset( $settings['rss_before_content'] ) ? $settings['rss_before_content'] : '' ); ?></textarea>
-                <p class="wmz-help"><?php esc_html_e( 'Placeholders: %post_title%, %post_link%, %site_name%, %site_link%', 'wpmazic-seo-lite' ); ?></p>
+                <p class="wmz-help"><?php
+                echo esc_html(
+                    sprintf(
+                        /* translators: 1: post title variable, 2: post link variable, 3: site name variable, 4: site link variable */
+                        __( 'Placeholders: %1$s, %2$s, %3$s, %4$s', 'wpmazic-seo-lite' ),
+                        '%post_title%',
+                        '%post_link%',
+                        '%site_name%',
+                        '%site_link%'
+                    )
+                );
+                ?></p>
             </div>
             <div class="wmz-field">
                 <label for="rss_after_content"><?php esc_html_e( 'RSS Content After Post', 'wpmazic-seo-lite' ); ?></label>

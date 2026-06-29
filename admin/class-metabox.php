@@ -319,7 +319,7 @@ class WPMazic_Metabox
                 <!-- SEO Score Indicator -->
                 <div id="wpmazic-seo-score" class="wpmazic-seo-score wpmazic-score-ok">
                     <span class="wpmazic-score-dot"></span>
-                    <span id="wpmazic-score-label"><?php esc_html_e('SEO Score: Analyzing…', 'wpmazic-seo-lite'); ?></span>
+                    <span id="wpmazic-score-label"><?php esc_html_e('SEO Score: Analyzingâ€¦', 'wpmazic-seo-lite'); ?></span>
                 </div>
 
                 <!-- Google Search Preview -->
@@ -329,7 +329,7 @@ class WPMazic_Metabox
                     </p>
                     <p class="wpmazic-preview-url"><?php echo esc_url(get_permalink($post->ID)); ?></p>
                     <p class="wpmazic-preview-desc" id="wpmazic-preview-desc">
-                        <?php echo esc_html(!empty($meta['description']) ? $meta['description'] : wp_trim_words($post->post_content, 25, '…')); ?>
+                        <?php echo esc_html(!empty($meta['description']) ? $meta['description'] : wp_trim_words($post->post_content, 25, 'â€¦')); ?>
                     </p>
                 </div>
 
@@ -342,19 +342,19 @@ class WPMazic_Metabox
                         id="wpmazic-title-count"><?php echo esc_html(strlen((string) $meta['title'])); ?> / 60
                         <?php esc_html_e('characters', 'wpmazic-seo-lite'); ?></span>
                     <span
-                        class="description"><?php esc_html_e('Recommended: 50–60 characters. The title tag displayed in search results.', 'wpmazic-seo-lite'); ?></span>
+                        class="description"><?php esc_html_e('Recommended: 50â€“60 characters. The title tag displayed in search results.', 'wpmazic-seo-lite'); ?></span>
                 </div>
 
                 <!-- Meta Description -->
                 <div class="wpmazic-field">
                     <label for="wpmazic_description"><?php esc_html_e('Meta Description', 'wpmazic-seo-lite'); ?></label>
                     <textarea id="wpmazic_description" name="wpmazic_description" rows="3" maxlength="320"
-                        placeholder="<?php esc_attr_e('Enter a meta description…', 'wpmazic-seo-lite'); ?>"><?php echo esc_textarea($meta['description']); ?></textarea>
+                        placeholder="<?php esc_attr_e('Enter a meta descriptionâ€¦', 'wpmazic-seo-lite'); ?>"><?php echo esc_textarea($meta['description']); ?></textarea>
                     <span class="wpmazic-char-count"
                         id="wpmazic-desc-count"><?php echo esc_html(strlen((string) $meta['description'])); ?> / 160
                         <?php esc_html_e('characters', 'wpmazic-seo-lite'); ?></span>
                     <span
-                        class="description"><?php esc_html_e('Recommended: 120–160 characters. Shown beneath the title in search results.', 'wpmazic-seo-lite'); ?></span>
+                        class="description"><?php esc_html_e('Recommended: 120â€“160 characters. Shown beneath the title in search results.', 'wpmazic-seo-lite'); ?></span>
                 </div>
 
                 <!-- Focus Keyword (Primary) -->
@@ -397,7 +397,7 @@ class WPMazic_Metabox
                 <div class="wpmazic-field">
                     <label for="wpmazic_og_description"><?php esc_html_e('OG Description', 'wpmazic-seo-lite'); ?></label>
                     <textarea id="wpmazic_og_description" name="wpmazic_og_description" rows="3"
-                        placeholder="<?php esc_attr_e('Enter Open Graph description…', 'wpmazic-seo-lite'); ?>"><?php echo esc_textarea($meta['og_description']); ?></textarea>
+                        placeholder="<?php esc_attr_e('Enter Open Graph descriptionâ€¦', 'wpmazic-seo-lite'); ?>"><?php echo esc_textarea($meta['og_description']); ?></textarea>
                 </div>
 
                 <!-- OG Image -->
@@ -418,7 +418,7 @@ class WPMazic_Metabox
                             data-preview="wpmazic-og-image-preview" <?php echo empty($meta['og_image']) ? 'style="display:none;"' : ''; ?>><?php esc_html_e('Remove', 'wpmazic-seo-lite'); ?></button>
                     </div>
                     <span
-                        class="description"><?php esc_html_e('Recommended size: 1200×630 pixels.', 'wpmazic-seo-lite'); ?></span>
+                        class="description"><?php esc_html_e('Recommended size: 1200Ã—630 pixels.', 'wpmazic-seo-lite'); ?></span>
                 </div>
 
                 <hr />
@@ -456,7 +456,7 @@ class WPMazic_Metabox
                     <label
                         for="wpmazic_twitter_description"><?php esc_html_e('Twitter Description', 'wpmazic-seo-lite'); ?></label>
                     <textarea id="wpmazic_twitter_description" name="wpmazic_twitter_description" rows="3"
-                        placeholder="<?php esc_attr_e('Enter Twitter description…', 'wpmazic-seo-lite'); ?>"><?php echo esc_textarea($meta['twitter_description']); ?></textarea>
+                        placeholder="<?php esc_attr_e('Enter Twitter descriptionâ€¦', 'wpmazic-seo-lite'); ?>"><?php echo esc_textarea($meta['twitter_description']); ?></textarea>
                 </div>
 
                 <!-- Twitter Image -->
@@ -477,7 +477,7 @@ class WPMazic_Metabox
                             data-preview="wpmazic-twitter-image-preview" <?php echo empty($meta['twitter_image']) ? 'style="display:none;"' : ''; ?>><?php esc_html_e('Remove', 'wpmazic-seo-lite'); ?></button>
                     </div>
                     <span
-                        class="description"><?php esc_html_e('Recommended size: 1200×628 pixels for Summary with Large Image.', 'wpmazic-seo-lite'); ?></span>
+                        class="description"><?php esc_html_e('Recommended size: 1200Ã—628 pixels for Summary with Large Image.', 'wpmazic-seo-lite'); ?></span>
                 </div>
 
             </div><!-- /Social -->
@@ -492,14 +492,14 @@ class WPMazic_Metabox
                         <label>
                             <input type="checkbox" name="wpmazic_noindex" value="1" <?php checked($meta['noindex'], '1'); ?> />
                             <strong><?php esc_html_e('No Index', 'wpmazic-seo-lite'); ?></strong>
-                            — <?php esc_html_e('Prevent search engines from indexing this page.', 'wpmazic-seo-lite'); ?>
+                            â€” <?php esc_html_e('Prevent search engines from indexing this page.', 'wpmazic-seo-lite'); ?>
                         </label>
                     </div>
                     <div class="wpmazic-checkbox-field">
                         <label>
                             <input type="checkbox" name="wpmazic_nofollow" value="1" <?php checked($meta['nofollow'], '1'); ?> />
                             <strong><?php esc_html_e('No Follow', 'wpmazic-seo-lite'); ?></strong>
-                            —
+                            â€”
                             <?php esc_html_e('Prevent search engines from following links on this page.', 'wpmazic-seo-lite'); ?>
                         </label>
                     </div>
@@ -507,7 +507,7 @@ class WPMazic_Metabox
                         <label>
                             <input type="checkbox" name="wpmazic_noarchive" value="1" <?php checked($meta['noarchive'], '1'); ?> />
                             <strong><?php esc_html_e('No Archive', 'wpmazic-seo-lite'); ?></strong>
-                            —
+                            â€”
                             <?php esc_html_e('Prevent cached archive copy display in search results.', 'wpmazic-seo-lite'); ?>
                         </label>
                     </div>
@@ -515,14 +515,14 @@ class WPMazic_Metabox
                         <label>
                             <input type="checkbox" name="wpmazic_nosnippet" value="1" <?php checked($meta['nosnippet'], '1'); ?> />
                             <strong><?php esc_html_e('No Snippet', 'wpmazic-seo-lite'); ?></strong>
-                            — <?php esc_html_e('Prevent text snippets in search result listings.', 'wpmazic-seo-lite'); ?>
+                            â€” <?php esc_html_e('Prevent text snippets in search result listings.', 'wpmazic-seo-lite'); ?>
                         </label>
                     </div>
                     <div class="wpmazic-checkbox-field">
                         <label>
                             <input type="checkbox" name="wpmazic_noimageindex" value="1" <?php checked($meta['noimageindex'], '1'); ?> />
                             <strong><?php esc_html_e('No Image Index', 'wpmazic-seo-lite'); ?></strong>
-                            — <?php esc_html_e('Prevent images on this page from being indexed.', 'wpmazic-seo-lite'); ?>
+                            â€” <?php esc_html_e('Prevent images on this page from being indexed.', 'wpmazic-seo-lite'); ?>
                         </label>
                     </div>
                 </div>
@@ -563,7 +563,7 @@ class WPMazic_Metabox
                         <label>
                             <input type="checkbox" name="wpmazic_cornerstone" value="1" <?php checked($meta['cornerstone'], '1'); ?> />
                             <strong><?php esc_html_e('Cornerstone Content', 'wpmazic-seo-lite'); ?></strong>
-                            —
+                            â€”
                             <?php esc_html_e('Mark this as cornerstone content (most important, comprehensive articles on your site).', 'wpmazic-seo-lite'); ?>
                         </label>
                     </div>
@@ -618,11 +618,23 @@ class WPMazic_Metabox
                             <div class="wpmazic-faq-item-row">
                                 <div class="wpmazic-faq-item-fields">
                                     <label
-                                        class="wpmazic-faq-question-label"><?php printf( esc_html__( 'Question %d', 'wpmazic-seo-lite' ), absint( $i + 1 ) ); ?></label>
+                                        class="wpmazic-faq-question-label"><?php
+                                        printf(
+                                            /* translators: %d: FAQ item number */
+                                            esc_html__( 'Question %d', 'wpmazic-seo-lite' ),
+                                            absint( $i + 1 )
+                                        );
+                                        ?></label>
                                     <input type="text" name="wpmazic_faq_question[]" value="<?php echo esc_attr($question); ?>"
                                         placeholder="<?php esc_attr_e('Enter question', 'wpmazic-seo-lite'); ?>" />
                                     <label class="wpmazic-faq-answer-label"
-                                        style="margin:8px 0 4px;"><?php printf( esc_html__( 'Answer %d', 'wpmazic-seo-lite' ), absint( $i + 1 ) ); ?></label>
+                                        style="margin:8px 0 4px;"><?php
+                                        printf(
+                                            /* translators: %d: FAQ item number */
+                                            esc_html__( 'Answer %d', 'wpmazic-seo-lite' ),
+                                            absint( $i + 1 )
+                                        );
+                                        ?></label>
                                     <textarea name="wpmazic_faq_answer[]" rows="3"
                                         placeholder="<?php esc_attr_e('Enter short answer', 'wpmazic-seo-lite'); ?>"><?php echo esc_textarea($answer); ?></textarea>
                                 </div>
@@ -644,662 +656,7 @@ class WPMazic_Metabox
 
         </div><!-- /.wpmazic-metabox-wrap -->
 
-        <?php if ( false ) :
-        $metabox_js = '
-        (function($){
-            "use strict";
-
-            /* ============================
-             * TABS
-             * ============================ */
-            $(document).on("click", ".wpmazic-tab-link", function(e){
-                e.preventDefault();
-                var tab = $(this).data("tab");
-                $(".wpmazic-tab-link").removeClass("wpmazic-tab-active");
-                $(this).addClass("wpmazic-tab-active");
-                $(".wpmazic-tab-content").removeClass("wpmazic-tab-active");
-                $("#" + tab).addClass("wpmazic-tab-active");
-            });
-
-            /* ============================
-             * LIVE PREVIEW + CHAR COUNTERS
-             * ============================ */
-            var defaultTitle = ' . wp_json_encode($post_title . ' ' . $sep . ' ' . $site_title) . ';
-            var defaultDesc  = ' . wp_json_encode(wp_trim_words($post->post_content, 25, '…')) . ';
-
-            function updatePreview() {
-                var title = $("#wpmazic_title").val() || defaultTitle;
-                var desc  = $("#wpmazic_description").val() || defaultDesc;
-                $("#wpmazic-preview-title").text( title );
-                $("#wpmazic-preview-desc").text( desc );
-            }
-        ';
-        ?>
-        <legacy-script>
-            function updateCharCount(inputId, countId, recommended) {
-                var len = $('#' + inputId).val().length;
-                var $counter = $('#' + countId);
-                $counter.text(len + ' / ' + recommended + ' <?php echo esc_js(__('characters', 'wpmazic-seo-lite')); ?>');
-                $counter.removeClass('wpmazic-char-warning wpmazic-char-good');
-                if (len === 0) {
-                    // neutral
-                } else if (len > recommended) {
-                    $counter.addClass('wpmazic-char-warning');
-                } else if (len >= Math.round(recommended * 0.7)) {
-                    $counter.addClass('wpmazic-char-good');
-                }
-            }
-
-            $('#wpmazic_title').on('input keyup', function () {
-                updateCharCount('wpmazic_title', 'wpmazic-title-count', 60);
-                updatePreview();
-            });
-
-            $('#wpmazic_description').on('input keyup', function () {
-                updateCharCount('wpmazic_description', 'wpmazic-desc-count', 160);
-                updatePreview();
-            });
-
-            // Initialize.
-            updateCharCount('wpmazic_title', 'wpmazic-title-count', 60);
-            updateCharCount('wpmazic_description', 'wpmazic-desc-count', 160);
-            updatePreview();
-
-            /* ============================
-            * FAQ REPEATER
-            * ============================ */
-            var faqLimit = <?php echo (int) $faq_limit; ?>;
-            var faqQuestionLabel = <?php echo wp_json_encode(__('Question', 'wpmazic-seo-lite')); ?>;
-            var faqAnswerLabel = <?php echo wp_json_encode(__('Answer', 'wpmazic-seo-lite')); ?>;
-            var faqQuestionPlaceholder = <?php echo wp_json_encode(__('Enter question', 'wpmazic-seo-lite')); ?>;
-            var faqAnswerPlaceholder = <?php echo wp_json_encode(__('Enter short answer', 'wpmazic-seo-lite')); ?>;
-
-            function buildFaqRow(item, index) {
-                item = item || {};
-                var $row = $('
-                    < div /> ', { 'class': 'wpmazic - faq - item - row' });
-                    var $fields = $('
-                        < div /> ', { 'class': 'wpmazic - faq - item - fields' }).appendTo($row);
-
-                    $('<label />', {
-                            'class': 'wpmazic-faq-question-label',
-                            text: faqQuestionLabel + ' ' + (index + 1)
-                        }).appendTo($fields);
-                $('<input />', {
-                    type: 'text',
-                    name: 'wpmazic_faq_question[]',
-                    value: item.question || '',
-                    placeholder: faqQuestionPlaceholder
-                }).appendTo($fields);
-                $('<label />', {
-                    'class': 'wpmazic-faq-answer-label',
-                    text: faqAnswerLabel + ' ' + (index + 1),
-                    style: 'margin:8px 0 4px;'
-                }).appendTo($fields);
-                $('<textarea />', {
-                    name: 'wpmazic_faq_answer[]',
-                    rows: 3,
-                    placeholder: faqAnswerPlaceholder
-                }).val(item.answer || '').appendTo($fields);
-                $('<button />', {
-                    type: 'button',
-                    'class': 'button-link-delete wpmazic-faq-remove',
-                    'aria-label': '<?php echo esc_js(__('Remove FAQ item', 'wpmazic-seo-lite')); ?>',
-                    text: '<?php echo esc_js(__('Remove', 'wpmazic-seo-lite')); ?>'
-                }).appendTo($row);
-
-                return $row;
-            }
-
-            function refreshFaqRows() {
-                var $wrap = $('#wpmazic-faq-items-wrap');
-                if (!$wrap.length) {
-                    return;
-                }
-
-                var $rows = $wrap.find('.wpmazic-faq-item-row');
-                if (!$rows.length) {
-                    $wrap.append(buildFaqRow({}, 0));
-                    $rows = $wrap.find('.wpmazic-faq-item-row');
-                }
-
-                $rows.each(function (index) {
-                    $(this).find('.wpmazic-faq-question-label').text(faqQuestionLabel + ' ' + (index + 1));
-                    $(this).find('.wpmazic-faq-answer-label').text(faqAnswerLabel + ' ' + (index + 1));
-                });
-
-                var rowCount = $rows.length;
-                var canAdd = faqLimit === 0 || rowCount < faqLimit; $('#wpmazic-faq-add').prop('disabled', !canAdd);
-                $rows.find('.wpmazic-faq-remove').show(); if (rowCount === 1) {
-                    $rows.first().find('.wpmazic-faq-remove').hide();
-                }
-            } $(document).on('click', '#wpmazic-faq-add', function (e) {
-                e.preventDefault(); var $wrap = $('#wpmazic-faq-items-wrap'); if (!$wrap.length) { return; } var
-                    rowCount = $wrap.find('.wpmazic-faq-item-row').length; if (faqLimit > 0 && rowCount >= faqLimit) {
-                        return;
-                    }
-
-                $wrap.append(buildFaqRow({}, rowCount));
-                refreshFaqRows();
-            });
-
-            $(document).on('click', '.wpmazic-faq-remove', function (e) {
-                e.preventDefault();
-                $(this).closest('.wpmazic-faq-item-row').remove();
-                refreshFaqRows();
-            });
-
-            refreshFaqRows();
-
-            /* ============================
-            * SEO SCORE + CONTENT ANALYSIS
-            * ============================ */
-            function runAnalysis() {
-                var keyword = $('#wpmazic_keyword').val().trim().toLowerCase();
-                var title = $('#wpmazic_title').val().trim();
-                var desc = $('#wpmazic_description').val().trim();
-                var checks = [];
-                var score = 0;
-                var total = 0;
-                var contentRaw = '';
-                var contentText = '';
-                var words = [];
-                var sentences = [];
-                var wordCount = 0;
-
-                if (typeof tinymce !== 'undefined' && tinymce.get('content')) {
-                    contentRaw = tinymce.get('content').getContent({ format: 'raw' }) || '';
-                }
-                if (!contentRaw) {
-                    contentRaw = $('#content').val() || <?php echo wp_json_encode((string) $post->post_content); ?>;
-                }
-
-                contentText = String(contentRaw)
-                    .replace(/<style[\s\S]*?<\ /style >/gi, ' ')
-                    .replace(/<script[\s\S]*?<\ /script >/gi, ' ')
-                    .replace(/<\ / ? [^>] +>/g, ' ')
-                    .replace(/\s+/g, ' ')
-                    .trim()
-                    .toLowerCase();
-                words = contentText ? contentText.split(' ') : [];
-                wordCount = words.length;
-                sentences = contentText ? contentText.split(/[.!?]+/).filter(function (item) { return item.trim(); })
-                    : [];
-
-                if (!keyword) {
-                    $('#wpmazic-analysis-list').html('<li class="wpmazic-check-warn"><?php echo esc_js(__('Enter a focus keyword to see content analysis.', 'wpmazic-seo-lite')); ?></li>');
-                    $('#wpmazic-seo-score').removeClass('wpmazic-score-good wpmazic-score-ok
-                                    wpmazic - score - bad').addClass('wpmazic - score - ok');
-                                    $('#wpmazic-score-label').text('<?php echo esc_js(__('SEO Score: N/A', 'wpmazic-seo-lite')); ?>');
-                    return;
-                }
-
-                // Check: Keyword in title
-                total++;
-                if (title.toLowerCase().indexOf(keyword) !== -1) {
-                    checks.push({ status: 'good', text: '<?php echo esc_js(__('Focus keyword found in SEO title.', 'wpmazic-seo-lite')); ?>' });
-                    score++;
-                } else {
-                    checks.push({ status: 'bad', text: '<?php echo esc_js(__('Focus keyword not found in SEO title.', 'wpmazic-seo-lite')); ?>' });
-                }
-
-                // Check: Keyword in description
-                total++;
-                if (desc.toLowerCase().indexOf(keyword) !== -1) {
-                    checks.push({ status: 'good', text: '<?php echo esc_js(__('Focus keyword found in meta description.', 'wpmazic-seo-lite')); ?>' });
-                    score++;
-                } else {
-                    checks.push({ status: 'bad', text: '<?php echo esc_js(__('Focus keyword not found in meta description.', 'wpmazic-seo-lite')); ?>' });
-                }
-
-                // Check: Title length
-                total++;
-                if (title.length >= 30 && title.length <= 60) {
-                    checks.push({
-                        status: 'good',
-                        text: '<?php echo esc_js(__('SEO title length is optimal.', 'wpmazic-seo-lite')); ?>'
-                    });
-                    score++;
-                } else if (title.length > 0 && title.length < 30) {
-                    checks.push({
-                        status: 'warn',
-                        text: '<?php echo esc_js(__('SEO title is too short. Aim for 50–60 characters.', 'wpmazic-seo-lite')); ?>'
-                    }); score += 0.5;
-                } else if (title.length > 60) {
-                    checks.push({ status: 'warn', text: '<?php echo esc_js(__('SEO title is too long. Aim for 50–60 characters.', 'wpmazic-seo-lite')); ?>' });
-                    score += 0.5;
-                } else {
-                    checks.push({ status: 'bad', text: '<?php echo esc_js(__('SEO title is empty.', 'wpmazic-seo-lite')); ?>' });
-                }
-
-                // Check: Description length
-                total++;
-                if (desc.length >= 120 && desc.length <= 160) {
-                    checks.push({
-                        status: 'good',
-                        text: '<?php echo esc_js(__('Meta description length is optimal.', 'wpmazic-seo-lite')); ?>'
-                    }); score++;
-                } else if (desc.length > 0 && desc.length < 120) {
-                    checks.push({
-                        status: 'warn',
-                        text: '<?php echo esc_js(__('Meta description is short. Aim for 120–160 characters.', 'wpmazic-seo-lite')); ?>'
-                    }); score += 0.5;
-                } else if (desc.length > 160) {
-                    checks.push({ status: 'warn', text: '<?php echo esc_js(__('Meta description is too long. Aim for 120–160 characters.', 'wpmazic-seo-lite')); ?>' });
-                    score += 0.5;
-                } else {
-                    checks.push({ status: 'bad', text: '<?php echo esc_js(__('Meta description is empty.', 'wpmazic-seo-lite')); ?>' });
-                }
-
-                // Check: Keyword at beginning of title
-                total++;
-                if (title.toLowerCase().indexOf(keyword) === 0) {
-                    checks.push({ status: 'good', text: '<?php echo esc_js(__('Focus keyword appears at the beginning of the SEO title.', 'wpmazic-seo-lite')); ?>' });
-                    score++;
-                } else if (title.toLowerCase().indexOf(keyword) > 0) {
-                    checks.push({ status: 'warn', text: '<?php echo esc_js(__('Focus keyword does not appear at the beginning of the SEO title.', 'wpmazic-seo-lite')); ?>' });
-                    score += 0.5;
-                } else {
-                    checks.push({ status: 'bad', text: '<?php echo esc_js(__('Focus keyword is missing from the SEO title.', 'wpmazic-seo-lite')); ?>' });
-                }
-
-                // Check: Content length recommendation
-                total++;
-                if (wordCount >= 600) {
-                    checks.push({ status: 'good', text: '<?php echo esc_js(__('Content length is strong (600+ words).', 'wpmazic-seo-lite')); ?>' });
-                    score++;
-                } else if (wordCount >= 300) {
-                    checks.push({ status: 'warn', text: '<?php echo esc_js(__('Content length is moderate. Add more depth for competitive topics.', 'wpmazic-seo-lite')); ?>' });
-                    score += 0.5;
-                } else {
-                    checks.push({ status: 'bad', text: '<?php echo esc_js(__('Content appears thin (under 300 words).', 'wpmazic-seo-lite')); ?>' });
-                }
-
-                // Check: Keyword density
-                total++;
-                var keywordOccurrences = 0;
-                if (keyword) {
-                    var escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    var keywordRegex = new RegExp('\\b' + escapedKeyword + '\\b', 'gi');
-                    var keywordMatch = contentText.match(keywordRegex);
-                    keywordOccurrences = keywordMatch ? keywordMatch.length : 0;
-                }
-                var density = wordCount > 0 ? (keywordOccurrences / wordCount) * 100 : 0;
-                if (density >= 0.5 && density <= 2.5) {
-                    checks.push({
-                        status: 'good',
-                        text: '<?php echo esc_js(__('Keyword density is in a natural range.', 'wpmazic-seo-lite')); ?>'
-                            + ' (' + density.toFixed(2) + '%)'
-                    }); score++;
-                } else if (density > 0 &&
-                    density < 0.5) {
-                        checks.push({
-                            status: 'warn',
-                            text: '<?php echo esc_js(__('Keyword density is low. Add natural mentions.', 'wpmazic-seo-lite')); ?>'
-                                + ' (' + density.toFixed(2) + '%)'
-                        }); score += 0.5;
-                } else if (density > 2.5
-                ) {
-                    checks.push({
-                        status: 'warn', text: '<?php echo esc_js(__('Keyword density may be too high.', 'wpmazic-seo-lite')); ?>' + ' (' + density.toFixed(2) +
-                            '%)'
-                    });
-                    score += 0.5;
-                } else {
-                    checks.push({ status: 'bad', text: '<?php echo esc_js(__('Keyword not found in content body.', 'wpmazic-seo-lite')); ?>' });
-                }
-
-                // Check: Heading structure
-                total++;
-                var h1Count = (String(contentRaw).match(/<h1\b /gi) || []).length; var
-                    h2Count = (String(contentRaw).match(/<h2\b/gi) || []).length; if (
-                    h1Count === 1 && h2Count >= 1) {
-                    checks.push({ status: 'good', text: '<?php echo esc_js(__('Heading structure looks good (H1 + H2).', 'wpmazic-seo-lite')); ?>' });
-                    score++;
-                } else if (h1Count <= 1 && h2Count >= 1) {
-                    checks.push({ status: 'warn', text: '<?php echo esc_js(__('H2 headings are present. Confirm one clear H1.', 'wpmazic-seo-lite')); ?>' });
-                    score += 0.5;
-                } else {
-                    checks.push({ status: 'bad', text: '<?php echo esc_js(__('Heading hierarchy needs improvement.', 'wpmazic-seo-lite')); ?>' });
-                }
-
-                // Check: Internal / external links
-                var linkNodes = String(contentRaw).match(/<a\b[^>
-                                                                        ]* href=["'][^"']+["'][^>] *>/gi) || [];
-                var internalLinks = 0;
-                var externalLinks = 0;
-                for (var li = 0; li < linkNodes.length; li++) {
-                    var
-                    hrefMatch = linkNodes[li].match(/href=["']([^"']+)["']/i); if
-                        (!hrefMatch) { continue; } var href = String(hrefMatch[1]
-                            || '').toLowerCase(); if (href.indexOf('mailto:') === 0 ||
-                                href.indexOf('tel:') === 0 || href.indexOf('#') === 0) {
-                        continue;
-                    } if (href.indexOf('http') !== 0 ||
-                        href.indexOf(location.hostname.toLowerCase()) !== -1) {
-                        internalLinks++;
-                    } else { externalLinks++; }
-                } total++; if (
-                    internalLinks >= 2) {
-                    checks.push({
-                        status: 'good', text: '<?php echo esc_js(__('Internal linking is healthy.', 'wpmazic-seo-lite')); ?>'
-                            + ' (' + internalLinks + ')'
-                    });
-                    score++;
-                } else if (internalLinks === 1) {
-                    checks.push({ status: 'warn', text: '<?php echo esc_js(__('Only one internal link found. Add more contextual links.', 'wpmazic-seo-lite')); ?>' });
-                    score += 0.5;
-                } else {
-                    checks.push({ status: 'bad', text: '<?php echo esc_js(__('No internal links found in content body.', 'wpmazic-seo-lite')); ?>' });
-                }
-
-                total++;
-                if (externalLinks >= 1) {
-                    checks.push({
-                        status: 'good', text: '<?php echo esc_js(__('External references detected.', 'wpmazic-seo-lite')); ?>'
-                            + ' (' + externalLinks + ')'
-                    });
-                    score++;
-                } else {
-                    checks.push({ status: 'warn', text: '<?php echo esc_js(__('No external references detected. Add citations where relevant.', 'wpmazic-seo-lite')); ?>' });
-                    score += 0.5;
-                }
-
-                // Check: Image ALT text in content
-                total++;
-                var imageNodes = String(contentRaw).match(/<img\b[^>]*>/gi)
-                    || [];
-                var missingAlt = 0;
-                for (var im = 0; im < imageNodes.length; im++) {
-                    if (
-                        ! /alt=["'][^"']*["']/i.test(imageNodes[im])) {
-                        missingAlt++;
-                    }
-                } if (imageNodes.length === 0) {
-                    checks.push({
-                        status: 'warn',
-                        text: '<?php echo esc_js(__('No inline images found in content body.', 'wpmazic-seo-lite')); ?>'
-                    }); score += 0.5;
-                } else if (missingAlt === 0) {
-                    checks.push({
-                        status: 'good',
-                        text: '<?php echo esc_js(__('All detected content images include ALT text.', 'wpmazic-seo-lite')); ?>'
-                    }); score++;
-                } else {
-                    checks.push({
-                        status: 'bad',
-                        text: '<?php echo esc_js(__('Some content images are missing ALT text.', 'wpmazic-seo-lite')); ?>'
-                            + ' (' + missingAlt + ')'
-                    });
-                } // Check:
-                Readability(Flesch estimate) total++; var
-                    syllableCount = 0; for (var wi = 0; wi < words.length;
-                    wi++) {
-                        var word = String(words[wi] || ''
-                        ).replace(/[^a-z]/g, ''); if (!word) {
-                            continue;
-                        } if (word.length <= 3) {
-                            syllableCount += 1;
-                            continue;
-                        } var
-                            reduced = word.replace(/(?:es|ed|e)$/g, ''
-                            ).replace(/^y/, ''); var
-                                syllables = reduced.match(/[aeiouy]{1,2}/g);
-                    syllableCount += Math.max(1, syllables ?
-                        syllables.length : 1);
-                } var flesch = null; if (
-                    wordCount > 0 && sentences.length > 0) {
-                    flesch = 206.835 - 1.015 * (wordCount /
-                        sentences.length) - 84.6 * (syllableCount /
-                            wordCount);
-                }
-
-                if (flesch !== null && flesch >= 60) {
-                    checks.push({
-                        status: 'good', text: '<?php echo esc_js(__('Readability score is good.', 'wpmazic-seo-lite')); ?>' + ' (Flesch ' +
-                            flesch.toFixed(1) + ')'
-                    });
-                    score++;
-                } else if (flesch !== null && flesch >= 40) {
-                    checks.push({
-                        status: 'warn', text: '<?php echo esc_js(__('Readability is moderate. Simplify phrasing where possible.', 'wpmazic-seo-lite')); ?>'
-                            + ' (Flesch ' + flesch.toFixed(1) + ')'
-                    });
-                    score += 0.5;
-                } else {
-                    checks.push({
-                        status: 'bad', text: '<?php echo esc_js(__('Readability is difficult. Use shorter and clearer sentences.', 'wpmazic-seo-lite')); ?>'
-                    });
-                }
-
-                // Check: Passive voice and sentence length
-                total++;
-                var passiveCount = 0;
-                var passiveRegex =
-                    /\b(is|are|was|were|be|been|being|am)\b\s+\w+(ed|en)\b/i;
-                for (var si = 0; si < sentences.length; si++) {
-                    if
-                        (passiveRegex.test(sentences[si])) {
-                        passiveCount++;
-                    }
-                } var
-                    passiveRatio = sentences.length > 0 ? (
-                        passiveCount / sentences.length) * 100 : 0;
-                if (passiveRatio <= 10) {
-                    checks.push({
-                        status: 'good',
-                        text: '<?php echo esc_js(__('Passive voice usage is low.', 'wpmazic-seo-lite')); ?>'
-                            + ' (' + passiveRatio.toFixed(1) + '%)'
-                    });
-                    score++;
-                } else if (passiveRatio <= 20) {
-                    checks.push({
-                        status: 'warn',
-                        text: '<?php echo esc_js(__('Passive voice is moderate.', 'wpmazic-seo-lite')); ?>'
-                            + ' (' + passiveRatio.toFixed(1) + '%)'
-                    });
-                    score += 0.5;
-                } else {
-                    checks.push({
-                        status: 'bad',
-                        text: '<?php echo esc_js(__('Passive voice is high. Prefer active voice.', 'wpmazic-seo-lite')); ?>'
-                            + ' (' + passiveRatio.toFixed(1) + '%)'
-                    });
-                } total++; var
-                    avgSentenceWords = sentences.length > 0 ?
-                        wordCount / sentences.length : 0;
-                if (avgSentenceWords >= 12 &&
-                    avgSentenceWords <= 20) {
-                        checks.push({
-                            status: 'good',
-                            text: '<?php echo esc_js(__('Average sentence length is balanced.', 'wpmazic-seo-lite')); ?>'
-                                + ' (' + avgSentenceWords.toFixed(1)
-                                + ')'
-                        }); score++;
-                } else if (
-                    avgSentenceWords > 20) {
-                    checks.push({
-                        status: 'warn', text:
-                            '<?php echo esc_js(__('Sentences are long on average. Break up complex lines.', 'wpmazic-seo-lite')); ?>'
-                    });
-                    score += 0.5;
-                } else {
-                    checks.push({
-                        status: 'warn', text:
-                            '<?php echo esc_js(__('Sentence length is short. Add detail where needed.', 'wpmazic-seo-lite')); ?>'
-                    });
-                    score += 0.5;
-                }
-
-                // Check: Featured snippet opportunity
-                tip
-                total++;
-                var firstParagraphMatch =
-                    String(contentRaw).match(/<p\b[^>
-                                                                                                    ]*> ([\s\S] *?) <\ /p>/i);
-                var firstParagraphWords = 0;
-                if (firstParagraphMatch &&
-                    firstParagraphMatch[1]) {
-                    firstParagraphWords =
-                        String(firstParagraphMatch[1]).replace(/
-                            <\ /?[^>]+>/g, '
-                                                                                                            ').trim().split(/\s+/).filter(function(item){
-                                                                                                            return item;
-                }).length;
-            }
-
-            if (firstParagraphWords >=
-                40 && firstParagraphWords <=
-                60) {
-                    checks.push({
-                        status: 'good',
-                        text: '<?php echo esc_js(__('First paragraph is snippet-friendly (40-60 words).', 'wpmazic-seo-lite')); ?>'
-                    }); score++;
-            } else if (
-                firstParagraphWords > 0) {
-                checks.push({
-                    status:
-                        'warn', text: '<?php echo esc_js(__('Adjust first paragraph toward 40-60 words for snippet potential.', 'wpmazic-seo-lite')); ?>'
-                });
-                score += 0.5;
-            } else {
-                checks.push({
-                    status:
-                        'warn', text: '<?php echo esc_js(__('Add a clear opening paragraph to improve snippet eligibility.', 'wpmazic-seo-lite')); ?>'
-                });
-                score += 0.5;
-            }
-
-            // Render checks
-            var html = '';
-            for (var i = 0; i <
-                checks.length; i++) {
-                html
-                += '<li class="wpmazic-check-'
-                + checks[i].status
-                + '">' +
-                checks[i].text
-                + '</li>';
-            }
-            $('#wpmazic-analysis-list').html(html);
-            // Score rating var
-            pct = (score / total
-            ) * 100; var
-                scoreClass,
-                scoreLabel; if (
-                pct >= 80) {
-                scoreClass =
-                    'wpmazic-score-good';
-                scoreLabel = '<?php echo esc_js(__('SEO Score: Good', 'wpmazic-seo-lite')); ?>';
-            } else if (pct >=
-                50) {
-                scoreClass =
-                    'wpmazic-score-ok';
-                scoreLabel = '<?php echo esc_js(__('SEO Score: Needs Improvement', 'wpmazic-seo-lite')); ?>';
-            } else {
-                scoreClass =
-                    'wpmazic-score-bad';
-                scoreLabel = '<?php echo esc_js(__('SEO Score: Poor', 'wpmazic-seo-lite')); ?>';
-            }
-
-            $('#wpmazic-seo-score')
-                .removeClass('wpmazic-score-good
-                                                                                                                    wpmazic - score - ok
-                                                                                                                    wpmazic - score - bad')
-                    .addClass(
-                        scoreClass);
-            $('#wpmazic-score-label').text(
-                scoreLabel + ' (' +
-                Math.round(pct) +
-                '%)');
-                                                                                                                    }
-
-            $('#wpmazic_title,
-                                                                                                                    #wpmazic_description,
-                #wpmazic_keyword,
-                #content').on('input
-                                                                                                                    keyup', function(){
-                                                                                                                    runAnalysis();
-                                                                                                                    });
-
-            if (typeof tinymce
-                !== 'undefined') {
-                $(document).on('tinymce-editor-init',
-                    function (event,
-                        editor) {
-                        if (editor &&
-                            editor.id ===
-                            'content') {
-                            editor.on('keyup
-                                                                                                                    change', function(){
-                                                                                                                    runAnalysis();
-                        });
-            }
-                                                                                                                    });
-                                                                                                                    }
-            runAnalysis();
-
-            /*
-            ============================
-            * MEDIA UPLOADER
-            *
-            ============================
-            */
-            $(document).on('click',
-                '.wpmazic-upload-image',
-                function (e) {
-                    e.preventDefault();
-                    var $btn = $(this);
-                    var targetId =
-                        $btn.data('target');
-                    var previewId =
-                        $btn.data('preview');
-
-                    var frame =
-                        wp.media({
-                            title: '<?php echo esc_js(__('Select or Upload Image', 'wpmazic-seo-lite')); ?>',
-                            button: {
-                                text:
-                                    '<?php echo esc_js(__('Use this image', 'wpmazic-seo-lite')); ?>'
-                            },
-                            multiple: false
-                        });
-
-                    frame.on('select',
-                        function () {
-                            var attachment =
-                                frame.state().get('selection').first().toJSON();
-                            $('#' +
-                                targetId).val(
-                                    attachment.url);
-                            $('#' +
-                                previewId).attr('src',
-                                    attachment.url).show();
-                            $btn.siblings('.wpmazic-remove-image').show();
-                        });
-
-                    frame.open();
-                });
-
-            $(document).on('click',
-                '.wpmazic-remove-image',
-                function (e) {
-                    e.preventDefault();
-                    var targetId =
-                        $(this).data('target');
-                    var previewId =
-                        $(this).data('preview');
-                    $('#' +
-                        targetId).val('');
-                    $('#' +
-                        previewId).attr('src',
-                            '').hide();
-                    $(this).hide();
-                });
-
-                                                                                                                    }) (jQuery);
-        </legacy-script>
-        <?php endif;
+        <?php
     }
 
     /**
@@ -1312,6 +669,7 @@ class WPMazic_Metabox
     {
 
         // 1. Verify nonce exists.
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce value is verified immediately below.
         if (!isset($_POST['wpmazic_metabox_nonce'])) {
             return;
         }
@@ -1320,6 +678,9 @@ class WPMazic_Metabox
         if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['wpmazic_metabox_nonce'])), 'wpmazic_metabox')) {
             return;
         }
+
+        // Nonce verified above; safe to read metabox POST fields.
+        // phpcs:disable WordPress.Security.NonceVerification.Missing
 
         // 3. Skip autosave.
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
@@ -1412,14 +773,8 @@ class WPMazic_Metabox
 
         // --- FAQ schema items ---
         if (isset($_POST['wpmazic_faq_question'], $_POST['wpmazic_faq_answer']) && is_array($_POST['wpmazic_faq_question']) && is_array($_POST['wpmazic_faq_answer'])) {
-            $questions = array_map(
-                'sanitize_text_field',
-                array_values( wp_unslash( $_POST['wpmazic_faq_question'] ) )
-            );
-            $answers = array_map(
-                'sanitize_textarea_field',
-                array_values( wp_unslash( $_POST['wpmazic_faq_answer'] ) )
-            );
+            $questions = array_values( map_deep( wp_unslash( $_POST['wpmazic_faq_question'] ), 'sanitize_text_field' ) );
+            $answers = array_values( map_deep( wp_unslash( $_POST['wpmazic_faq_answer'] ), 'sanitize_textarea_field' ) );
             $faq_items = array();
             $count = max(count($questions), count($answers));
 
@@ -1475,6 +830,7 @@ class WPMazic_Metabox
         if (!in_array($saved_card, $allowed_cards, true)) {
             update_post_meta($post_id, $this->prefix . 'twitter_card', 'summary_large_image');
         }
+        // phpcs:enable WordPress.Security.NonceVerification.Missing
     }
 }
 

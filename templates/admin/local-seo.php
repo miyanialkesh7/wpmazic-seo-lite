@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
 $settings = get_option( 'wpmazic_settings', array() );
 
 wpmazic_seo_admin_shell_open(
@@ -11,7 +13,10 @@ wpmazic_seo_admin_shell_open(
 );
 ?>
 
-<?php if ( isset( $_GET['settings-updated'] ) ) : ?>
+<?php
+$settings_updated = (string) wpmazic_seo_lite_get_get_value( 'settings-updated', 'sanitize_text_field', '' );
+?>
+<?php if ( '' !== $settings_updated ) : ?>
     <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Local SEO settings saved.', 'wpmazic-seo-lite' ); ?></p></div>
 <?php endif; ?>
 

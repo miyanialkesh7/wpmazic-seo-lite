@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
 global $wpdb;
 
 $post_types = get_post_types(
@@ -37,8 +39,7 @@ $normalize_text = static function ( $value ) {
     return strtolower( (string) $value );
 };
 
-$links_table      = wpmazic_seo_get_table_name( 'links' );
-$has_links_table  = ( $links_table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $links_table ) ) );
+$has_links_table  = wpmazic_seo_table_exists( 'links' );
 $outbound_map     = array();
 $inbound_map      = array();
 $tracked_links    = 0;
@@ -47,13 +48,15 @@ $broken_internal_links = array();
 $broken_internal_total = 0;
 
 if ( $has_links_table ) {
-    $tracked_links = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$links_table} WHERE type = 'internal'" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+    $links_table   = wpmazic_seo_get_table_name( 'links' );
+    $tracked_links = wpmazic_seo_count_table_where( 'links', 'type = %s', array( 'internal' ) );
 
     $outbound_rows = $wpdb->get_results(
-        "SELECT post_id, COUNT(*) AS total
-         FROM {$links_table}
-         WHERE type = 'internal'
-         GROUP BY post_id", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        $wpdb->prepare(
+            'SELECT post_id, COUNT(*) AS total FROM %i WHERE type = %s GROUP BY post_id',
+            $links_table,
+            'internal'
+        ),
         ARRAY_A
     );
     foreach ( $outbound_rows as $row ) {
@@ -61,11 +64,11 @@ if ( $has_links_table ) {
     }
 
     $inbound_rows = $wpdb->get_results(
-        "SELECT target_post_id, COUNT(*) AS total
-         FROM {$links_table}
-         WHERE type = 'internal'
-           AND target_post_id > 0
-         GROUP BY target_post_id", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        $wpdb->prepare(
+            'SELECT target_post_id, COUNT(*) AS total FROM %i WHERE type = %s AND target_post_id > 0 GROUP BY target_post_id',
+            $links_table,
+            'internal'
+        ),
         ARRAY_A
     );
     foreach ( $inbound_rows as $row ) {
@@ -73,13 +76,12 @@ if ( $has_links_table ) {
     }
 
     $anchor_rows = $wpdb->get_results(
-        "SELECT anchor_text, COUNT(*) AS total
-         FROM {$links_table}
-         WHERE type = 'internal'
-           AND anchor_text <> ''
-         GROUP BY anchor_text
-         ORDER BY total DESC
-         LIMIT 25", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        $wpdb->prepare(
+            "SELECT anchor_text, COUNT(*) AS total FROM %i WHERE type = %s AND anchor_text <> '' GROUP BY anchor_text ORDER BY total DESC LIMIT %d",
+            $links_table,
+            'internal',
+            25
+        ),
         ARRAY_A
     );
     foreach ( $anchor_rows as $anchor_row ) {
@@ -93,11 +95,14 @@ if ( $has_links_table ) {
         );
     }
 
+    if ( wpmazic_seo_table_exists( '404' ) ) {
+    $errors_table = wpmazic_seo_get_table_name( '404' );
     $error_rows = $wpdb->get_results(
-        'SELECT url, hits
-         FROM ' . wpmazic_seo_get_table_name( '404' ) . '
-         ORDER BY hits DESC
-         LIMIT 1000', // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        $wpdb->prepare(
+            'SELECT url, hits FROM %i ORDER BY hits DESC LIMIT %d',
+            $errors_table,
+            1000
+        ),
         ARRAY_A
     );
     $error_path_hits = array();
@@ -117,14 +122,17 @@ if ( $has_links_table ) {
             ? $error_path_hits[ $err_path ] + (int) $error_row['hits']
             : (int) $error_row['hits'];
     }
+    } else {
+        $error_path_hits = array();
+    }
 
     $link_rows = $wpdb->get_results(
-        "SELECT url, anchor_text, COUNT(*) AS uses
-         FROM {$links_table}
-         WHERE type = 'internal'
-         GROUP BY url, anchor_text
-         ORDER BY uses DESC
-         LIMIT 500", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        $wpdb->prepare(
+            'SELECT url, anchor_text, COUNT(*) AS uses FROM %i WHERE type = %s GROUP BY url, anchor_text ORDER BY uses DESC LIMIT %d',
+            $links_table,
+            'internal',
+            500
+        ),
         ARRAY_A
     );
 
@@ -382,11 +390,13 @@ foreach ( $posts as $post_row ) {
 // Build internal link suggestions (Yoast/RankMath-style helper).
 $existing_link_pairs = array();
 if ( $has_links_table ) {
+    $pairs_table = wpmazic_seo_get_table_name( 'links' );
     $pair_rows = $wpdb->get_results(
-        "SELECT post_id, target_post_id
-         FROM {$links_table}
-         WHERE type = 'internal'
-           AND target_post_id > 0", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        $wpdb->prepare(
+            'SELECT post_id, target_post_id FROM %i WHERE type = %s AND target_post_id > 0',
+            $pairs_table,
+            'internal'
+        ),
         ARRAY_A
     );
 
@@ -749,7 +759,15 @@ wpmazic_seo_admin_shell_open(
                             <tr>
                                 <td>
                                     <strong><?php echo esc_html( $group['label'] ); ?></strong><br>
-                                    <span class="wmz-subtle"><?php echo esc_html( sprintf( __( '%d URLs', 'wpmazic-seo-lite' ), count( $group['posts'] ) ) ); ?></span>
+                                    <span class="wmz-subtle"><?php
+                                    echo esc_html(
+                                        sprintf(
+                                            /* translators: %d: number of URLs */
+                                            __( '%d URLs', 'wpmazic-seo-lite' ),
+                                            count( $group['posts'] )
+                                        )
+                                    );
+                                    ?></span>
                                 </td>
                                 <td>
                                     <?php foreach ( $group['posts'] as $item ) : ?>
@@ -813,7 +831,15 @@ wpmazic_seo_admin_shell_open(
                     <?php if ( ! empty( $duplicate_titles ) ) : ?>
                         <?php foreach ( $duplicate_titles as $group ) : ?>
                             <tr>
-                                <td><?php echo esc_html( sprintf( __( '%d pages', 'wpmazic-seo-lite' ), count( $group ) ) ); ?></td>
+                                <td><?php
+                                echo esc_html(
+                                    sprintf(
+                                        /* translators: %d: number of pages */
+                                        __( '%d pages', 'wpmazic-seo-lite' ),
+                                        count( $group )
+                                    )
+                                );
+                                ?></td>
                                 <td>
                                     <?php foreach ( $group as $item ) : ?>
                                         <a href="<?php echo esc_url( get_edit_post_link( $item['id'] ) ); ?>"><?php echo esc_html( $item['title'] ); ?></a><br>
@@ -843,7 +869,15 @@ wpmazic_seo_admin_shell_open(
                     <?php if ( ! empty( $duplicate_descriptions ) ) : ?>
                         <?php foreach ( $duplicate_descriptions as $group ) : ?>
                             <tr>
-                                <td><?php echo esc_html( sprintf( __( '%d pages', 'wpmazic-seo-lite' ), count( $group ) ) ); ?></td>
+                                <td><?php
+                                echo esc_html(
+                                    sprintf(
+                                        /* translators: %d: number of pages */
+                                        __( '%d pages', 'wpmazic-seo-lite' ),
+                                        count( $group )
+                                    )
+                                );
+                                ?></td>
                                 <td>
                                     <?php foreach ( $group as $item ) : ?>
                                         <a href="<?php echo esc_url( get_edit_post_link( $item['id'] ) ); ?>"><?php echo esc_html( $item['title'] ); ?></a><br>

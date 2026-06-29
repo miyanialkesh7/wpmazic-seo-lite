@@ -12,6 +12,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
 class WPMazic_Admin
 {
 
@@ -331,6 +333,23 @@ class WPMazic_Admin
     }
 
     /**
+     * Read a POST value after verify_ajax_request() has validated the nonce.
+     *
+     * @param string $key     POST field name.
+     * @param mixed  $default Default when field is absent.
+     * @return mixed
+     */
+    private function get_ajax_post_raw( $key, $default = null ) {
+        // phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified in verify_ajax_request(); raw POST is unslashed for caller-side sanitization.
+        if ( ! isset( $_POST[ $key ] ) ) {
+            return $default;
+        }
+
+        return wp_unslash( $_POST[ $key ] );
+        // phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+    }
+
+    /**
      * Recursively sanitize decoded JSON payloads before downstream validation.
      *
      * @param mixed $value Payload value.
@@ -394,8 +413,16 @@ class WPMazic_Admin
     {
         $this->verify_ajax_request();
 
-        // SECURITY: Get and validate input
-        $raw_settings = isset($_POST['settings']) ? $_POST['settings'] : array();
+        // SECURITY: Sanitize input as soon as it is read from POST.
+        $raw_settings = array();
+        $post_settings = $this->get_ajax_post_raw( 'settings' );
+        if ( null !== $post_settings ) {
+            if ( is_array( $post_settings ) ) {
+                $raw_settings = map_deep( $post_settings, 'sanitize_textarea_field' );
+            } else {
+                $raw_settings = wp_check_invalid_utf8( (string) $post_settings );
+            }
+        }
 
         // Validate input is not empty
         if (empty($raw_settings)) {
@@ -404,12 +431,12 @@ class WPMazic_Admin
 
         // Support JSON-encoded payload from JS.
         if (is_string($raw_settings)) {
-            $settings = $this->decode_json_request_array(wp_unslash($raw_settings));
+            $settings = $this->decode_json_request_array($raw_settings);
             if (is_wp_error($settings)) {
                 wp_send_json_error(array('message' => $settings->get_error_message()));
             }
         } elseif (is_array($raw_settings)) {
-            $settings = $this->sanitize_decoded_payload(wp_unslash($raw_settings));
+            $settings = $this->sanitize_decoded_payload($raw_settings);
         } else {
             $settings = array();
         }
@@ -444,13 +471,17 @@ class WPMazic_Admin
 
         // Posts that have a non-empty _wpmazic_title or _wpmazic_description meta
         $posts_with_seo = (int) $wpdb->get_var(
-            "SELECT COUNT( DISTINCT p.ID )
+            $wpdb->prepare(
+                "SELECT COUNT( DISTINCT p.ID )
              FROM {$wpdb->posts} p
              INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
              WHERE p.post_status = 'publish'
                AND p.post_type IN ('post','page')
-               AND pm.meta_key IN ('_wpmazic_title','_wpmazic_description')
-               AND pm.meta_value != ''"
+               AND pm.meta_key IN (%s,%s)
+               AND pm.meta_value != ''",
+                '_wpmazic_title',
+                '_wpmazic_description'
+            )
         );
 
         $total_content = $total_posts + $total_pages;
@@ -459,12 +490,10 @@ class WPMazic_Admin
             : 0;
 
         // Redirects table
-        $redirects_table = wpmazic_seo_get_table_name( 'redirects' );
-        $total_redirects = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$redirects_table}");
+        $total_redirects = wpmazic_seo_count_table_rows( 'redirects' );
 
         // 404 table
-        $errors_table = wpmazic_seo_get_table_name( '404' );
-        $total_404s = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$errors_table}");
+        $total_404s = wpmazic_seo_count_table_rows( '404' );
 
         $stats = array(
             'total_posts' => $total_posts,
@@ -502,8 +531,16 @@ class WPMazic_Admin
     {
         $this->verify_ajax_request();
 
-        // SECURITY: Get and validate input
-        $items_raw = isset($_POST['items']) ? $_POST['items'] : array();
+        // SECURITY: Sanitize input as soon as it is read from POST.
+        $items_raw = array();
+        $post_items = $this->get_ajax_post_raw( 'items' );
+        if ( null !== $post_items ) {
+            if ( is_array( $post_items ) ) {
+                $items_raw = map_deep( $post_items, 'sanitize_textarea_field' );
+            } else {
+                $items_raw = wp_check_invalid_utf8( sanitize_textarea_field( (string) $post_items ) );
+            }
+        }
 
         // Validate input is not empty
         if (empty($items_raw)) {
@@ -512,9 +549,9 @@ class WPMazic_Admin
 
         // Decode JSON if needed
         if (is_array($items_raw)) {
-            $items = $this->sanitize_decoded_payload(wp_unslash($items_raw));
+            $items = $this->sanitize_decoded_payload($items_raw);
         } else {
-            $items = $this->decode_json_request_array(wp_unslash($items_raw));
+            $items = $this->decode_json_request_array($items_raw);
             if (is_wp_error($items)) {
                 wp_send_json_error(array('message' => __('Invalid data format.', 'wpmazic-seo-lite')));
             }
@@ -609,7 +646,7 @@ class WPMazic_Admin
 
         global $wpdb;
 
-        $id = isset($_POST['id']) ? absint(wp_unslash($_POST['id'])) : 0;
+        $id = absint( $this->get_ajax_post_raw( 'id', 0 ) );
 
         if (!$id) {
             wp_send_json_error(array('message' => __('Invalid redirect ID.', 'wpmazic-seo-lite')));
@@ -638,7 +675,7 @@ class WPMazic_Admin
 
         global $wpdb;
 
-        $id = isset($_POST['id']) ? absint(wp_unslash($_POST['id'])) : 0;
+        $id = absint( $this->get_ajax_post_raw( 'id', 0 ) );
 
         if (!$id) {
             wp_send_json_error(array('message' => __('Invalid 404 entry ID.', 'wpmazic-seo-lite')));
@@ -667,9 +704,7 @@ class WPMazic_Admin
     {
         $this->verify_ajax_request();
 
-        // SECURITY: Validate and sanitize robots.txt content.
-        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-        $content = isset($_POST['robots_content']) ? sanitize_textarea_field(wp_unslash($_POST['robots_content'])) : '';
+        $content = sanitize_textarea_field( (string) $this->get_ajax_post_raw( 'robots_content', '' ) );
 
         // SECURITY: Limit robots.txt size to prevent abuse (max 10KB).
         if (strlen($content) > 10240) {
@@ -701,29 +736,36 @@ class WPMazic_Admin
         $cleaned = 0;
 
         // 1. Delete 404 entries older than 90 days.
-        $errors_table = wpmazic_seo_get_table_name( '404' );
-        $cleaned += (int) $wpdb->query(
-            $wpdb->prepare(
-                "DELETE FROM {$errors_table} WHERE created_at < %s",
-                gmdate('Y-m-d H:i:s', strtotime('-90 days'))
-            )
-        );
+        if ( wpmazic_seo_table_exists( '404' ) ) {
+            $errors_table = wpmazic_seo_get_table_name( '404' );
+            $cleaned += (int) $wpdb->query(
+                $wpdb->prepare(
+                    'DELETE FROM %i WHERE created_at < %s',
+                    $errors_table,
+                    gmdate('Y-m-d H:i:s', strtotime('-90 days'))
+                )
+            );
+        }
 
         // 2. Remove orphaned wpmazic post-meta (post no longer exists).
         $cleaned += (int) $wpdb->query(
-            "DELETE pm FROM {$wpdb->postmeta} pm
+            $wpdb->prepare(
+                "DELETE pm FROM {$wpdb->postmeta} pm
              LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id
              WHERE p.ID IS NULL
-               AND pm.meta_key LIKE '_wpmazic\_%'"
+               AND pm.meta_key LIKE %s",
+                $wpdb->esc_like( '_wpmazic_' ) . '%'
+            )
         );
 
         // 3. Optimize plugin tables.
-        $tables = array(
-            wpmazic_seo_get_table_name( 'redirects' ),
-            wpmazic_seo_get_table_name( '404' ),
-        );
-        foreach ($tables as $table) {
-            $wpdb->query("OPTIMIZE TABLE {$table}"); // phpcs:ignore WordPress.DB.PreparedSQL
+        foreach ( array( 'redirects', '404', 'links', 'indexnow' ) as $table_key ) {
+            if ( ! wpmazic_seo_table_exists( $table_key ) ) {
+                continue;
+            }
+
+            $optimize_table = wpmazic_seo_get_table_name( $table_key );
+            $wpdb->query( $wpdb->prepare( 'OPTIMIZE TABLE %i', $optimize_table ) );
         }
 
         wp_send_json_success(array(

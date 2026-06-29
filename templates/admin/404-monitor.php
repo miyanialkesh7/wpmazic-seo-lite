@@ -3,38 +3,33 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-global $wpdb;
-$table = wpmazic_seo_get_table_name( '404' );
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
-if ( isset( $_POST['wpmazic_delete_404_id'] ) && check_admin_referer( 'wpmazic_delete_404' ) ) {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        wpmazic_seo_lite_add_notice( 'error', __( 'Permission denied.', 'wpmazic-seo-lite' ) );
-    } else {
-        $delete_id = isset( $_POST['wpmazic_delete_404_id'] ) ? absint( wp_unslash( $_POST['wpmazic_delete_404_id'] ) ) : 0;
-        if ( $delete_id ) {
-            $wpdb->delete( $table, array( 'id' => $delete_id ), array( '%d' ) );
-            wpmazic_seo_lite_add_notice( 'success', __( '404 entry deleted.', 'wpmazic-seo-lite' ) );
-        }
+global $wpdb;
+$table_raw = wpmazic_seo_get_table_name( '404' );
+
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_delete_404_id', 'wpmazic_delete_404' ) ) {
+    $delete_id = (int) wpmazic_seo_lite_get_post_value( 'wpmazic_delete_404_id', 'absint', 0 );
+    if ( $delete_id && '' !== $table_raw ) {
+        $wpdb->delete( $table_raw, array( 'id' => $delete_id ), array( '%d' ) );
+        wpmazic_seo_lite_add_notice( 'success', __( '404 entry deleted.', 'wpmazic-seo-lite' ) );
     }
 }
 
-if ( isset( $_POST['wpmazic_clear_404'] ) && check_admin_referer( 'wpmazic_clear_404' ) ) {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        wpmazic_seo_lite_add_notice( 'error', __( 'Permission denied.', 'wpmazic-seo-lite' ) );
-    } else {
-        $wpdb->query( "TRUNCATE TABLE {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-        wpmazic_seo_lite_add_notice( 'success', __( '404 log cleared.', 'wpmazic-seo-lite' ) );
-    }
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_clear_404', 'wpmazic_clear_404' ) && wpmazic_seo_table_exists( '404' ) ) {
+    $wpdb->query( $wpdb->prepare( 'TRUNCATE TABLE %i', $table_raw ) );
+    wpmazic_seo_lite_add_notice( 'success', __( '404 log cleared.', 'wpmazic-seo-lite' ) );
 }
 
 $fetch_limit = 50;
 $errors      = $wpdb->get_results(
     $wpdb->prepare(
-        "SELECT * FROM {$table} ORDER BY last_hit DESC LIMIT %d",
+        'SELECT * FROM %i ORDER BY last_hit DESC LIMIT %d',
+        $table_raw,
         $fetch_limit
     )
 );
-$total_rows = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$total_rows = wpmazic_seo_count_table_rows( '404' );
 
 wpmazic_seo_admin_shell_open(
     __( '404 Monitor', 'wpmazic-seo-lite' ),

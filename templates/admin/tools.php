@@ -3,6 +3,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
 global $wpdb;
 
 $wmz_clip_text = static function ($text, $limit = 160) {
@@ -138,78 +140,66 @@ $wmz_build_focus_keyword = static function ($title, $content = '') {
     return sanitize_text_field(implode(' ', $top_tokens));
 };
 
-if (isset($_POST['wpmazic_save_robots']) && check_admin_referer('wpmazic_save_robots')) {
-    if (!current_user_can('manage_options')) {
-        wpmazic_seo_lite_add_notice('error', __('Permission denied.', 'wpmazic-seo-lite'));
-    } else {
-        $robots = isset($_POST['robots_content']) ? wp_unslash($_POST['robots_content']) : '';
-        $robots = sanitize_textarea_field($robots);
-        update_option('wpmazic_robots_txt', $robots);
-        wpmazic_seo_lite_add_notice('success', __('robots.txt saved successfully.', 'wpmazic-seo-lite'));
-    }
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_save_robots', 'wpmazic_save_robots' ) ) {
+    $robots = (string) wpmazic_seo_lite_get_post_value( 'robots_content', 'sanitize_textarea_field', '' );
+    update_option('wpmazic_robots_txt', $robots);
+    wpmazic_seo_lite_add_notice('success', __('robots.txt saved successfully.', 'wpmazic-seo-lite'));
 }
 
-if (isset($_POST['wpmazic_save_llms']) && check_admin_referer('wpmazic_save_llms')) {
-    if (!current_user_can('manage_options')) {
-        wpmazic_seo_lite_add_notice('error', __('Permission denied.', 'wpmazic-seo-lite'));
-    } else {
-        $llms = isset($_POST['llms_content']) ? wp_unslash($_POST['llms_content']) : '';
-        $llms = sanitize_textarea_field($llms);
-        update_option('wpmazic_llms_txt', $llms);
-        wpmazic_seo_lite_add_notice('success', __('llms.txt saved successfully.', 'wpmazic-seo-lite'));
-    }
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_save_llms', 'wpmazic_save_llms' ) ) {
+    $llms = (string) wpmazic_seo_lite_get_post_value( 'llms_content', 'sanitize_textarea_field', '' );
+    update_option('wpmazic_llms_txt', $llms);
+    wpmazic_seo_lite_add_notice('success', __('llms.txt saved successfully.', 'wpmazic-seo-lite'));
 }
 
-if (isset($_POST['wpmazic_optimize_db']) && check_admin_referer('wpmazic_optimize_db')) {
-    if (!current_user_can('manage_options')) {
-        wpmazic_seo_lite_add_notice('error', __('Permission denied.', 'wpmazic-seo-lite'));
-    } else {
-        $errors_table = wpmazic_seo_get_table_name( '404' );
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_optimize_db', 'wpmazic_optimize_db' ) ) {
+        if ( wpmazic_seo_table_exists( '404' ) ) {
+            $errors_table = wpmazic_seo_get_table_name( '404' );
+            $wpdb->query(
+                $wpdb->prepare(
+                    'DELETE FROM %i WHERE created_at < %s',
+                    $errors_table,
+                    gmdate('Y-m-d H:i:s', strtotime('-90 days'))
+                )
+            );
+        }
+
         $wpdb->query(
             $wpdb->prepare(
-                "DELETE FROM {$errors_table} WHERE created_at < %s",
-                gmdate('Y-m-d H:i:s', strtotime('-90 days'))
+                "DELETE pm FROM {$wpdb->postmeta} pm
+         LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+          WHERE p.ID IS NULL
+           AND pm.meta_key LIKE %s",
+                $wpdb->esc_like( '_wpmazic_' ) . '%'
             )
         );
 
-        $wpdb->query(
-            "DELETE pm FROM {$wpdb->postmeta} pm
-         LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-         WHERE p.ID IS NULL
-           AND pm.meta_key LIKE '_wpmazic\_%'"
-        );
-
         foreach ( array( 'redirects', '404', 'links', 'indexnow' ) as $table_key ) {
-            $table_name = wpmazic_seo_get_table_name( $table_key );
-            if ( '' === $table_name ) {
+            if ( ! wpmazic_seo_table_exists( $table_key ) ) {
                 continue;
             }
 
-            $wpdb->query( 'OPTIMIZE TABLE ' . $table_name ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            $optimize_table = wpmazic_seo_get_table_name( $table_key );
+            $wpdb->query( $wpdb->prepare( 'OPTIMIZE TABLE %i', $optimize_table ) );
         }
 
         wpmazic_seo_lite_add_notice('success', __('Database optimized.', 'wpmazic-seo-lite'));
-    }
 }
 
-if (isset($_POST['wpmazic_clear_cache']) && check_admin_referer('wpmazic_clear_cache')) {
-    if (!current_user_can('manage_options')) {
-        wpmazic_seo_lite_add_notice('error', __('Permission denied.', 'wpmazic-seo-lite'));
-    } else {
-        $wpdb->query(
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_clear_cache', 'wpmazic_clear_cache' ) ) {
+    $wpdb->query(
+        $wpdb->prepare(
             "DELETE FROM {$wpdb->options}
-             WHERE option_name LIKE '_transient_wpmazic\_%'
-                OR option_name LIKE '_transient_timeout_wpmazic\_%'"
-        );
-        do_action('wpmazic_clear_cache');
-        wpmazic_seo_lite_add_notice('success', __('Plugin cache cleared.', 'wpmazic-seo-lite'));
-    }
+         WHERE option_name LIKE '_transient_wpmazic\_%'
+            OR option_name LIKE %s",
+            $wpdb->esc_like( '_transient_timeout_wpmazic_' ) . '%'
+        )
+    );
+    do_action('wpmazic_clear_cache');
+    wpmazic_seo_lite_add_notice('success', __('Plugin cache cleared.', 'wpmazic-seo-lite'));
 }
 
-if (isset($_POST['wpmazic_generate_missing_meta']) && check_admin_referer('wpmazic_generate_missing_meta')) {
-    if (!current_user_can('manage_options')) {
-        wpmazic_seo_lite_add_notice('error', __('Permission denied.', 'wpmazic-seo-lite'));
-    } else {
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_generate_missing_meta', 'wpmazic_generate_missing_meta' ) ) {
     $post_types = get_post_types(
         array(
             'public' => true,
@@ -255,14 +245,15 @@ if (isset($_POST['wpmazic_generate_missing_meta']) && check_admin_referer('wpmaz
         }
     }
 
-    echo '<div class="notice notice-success is-dismissible"><p>' . sprintf(esc_html__('Meta generation completed. Titles updated: %1$d, Descriptions updated: %2$d.', 'wpmazic-seo-lite'), absint($updated_titles), absint($updated_desc)) . '</p></div>';
-    }
+    echo '<div class="notice notice-success is-dismissible"><p>' . sprintf(
+        /* translators: %1$d: titles updated, %2$d: descriptions updated */
+        esc_html__( 'Meta generation completed. Titles updated: %1$d, Descriptions updated: %2$d.', 'wpmazic-seo-lite' ),
+        absint( $updated_titles ),
+        absint( $updated_desc )
+    ) . '</p></div>';
 }
 
-if (isset($_POST['wpmazic_autofill_all_seo']) && check_admin_referer('wpmazic_autofill_all_seo')) {
-    if (!current_user_can('manage_options')) {
-        wpmazic_seo_lite_add_notice('error', __('Permission denied.', 'wpmazic-seo-lite'));
-    } else {
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_autofill_all_seo', 'wpmazic_autofill_all_seo' ) ) {
     $content_post_types = get_post_types(
         array(
             'public' => true,
@@ -441,7 +432,8 @@ if (isset($_POST['wpmazic_autofill_all_seo']) && check_admin_referer('wpmazic_au
 
     echo '<div class="notice notice-success is-dismissible"><p>' .
         sprintf(
-            esc_html__('Auto SEO completed. Content scanned: %1$d, Images scanned: %2$d. Updated -> SEO Title: %3$d, Description: %4$d, Keyword: %5$d, OG Title: %6$d, OG Description: %7$d, Twitter Title: %8$d, Twitter Description: %9$d, Canonical: %10$d, Image ALT: %11$d, Image Caption: %12$d, Image Description: %13$d, Image SEO Title: %14$d, Image SEO Description: %15$d, Image SEO Keyword: %16$d.', 'wpmazic-seo-lite'),
+            /* translators: %1$d: content scanned, %2$d: images scanned, %3$d: SEO titles updated, %4$d: descriptions updated, %5$d: keywords updated, %6$d: OG titles updated, %7$d: OG descriptions updated, %8$d: Twitter titles updated, %9$d: Twitter descriptions updated, %10$d: canonical URLs updated, %11$d: image ALT updated, %12$d: image captions updated, %13$d: image descriptions updated, %14$d: image SEO titles updated, %15$d: image SEO descriptions updated, %16$d: image SEO keywords updated */
+            esc_html__( 'Auto SEO completed. Content scanned: %1$d, Images scanned: %2$d. Updated -> SEO Title: %3$d, Description: %4$d, Keyword: %5$d, OG Title: %6$d, OG Description: %7$d, Twitter Title: %8$d, Twitter Description: %9$d, Canonical: %10$d, Image ALT: %11$d, Image Caption: %12$d, Image Description: %13$d, Image SEO Title: %14$d, Image SEO Description: %15$d, Image SEO Keyword: %16$d.', 'wpmazic-seo-lite' ),
             absint($stats['content_scanned']),
             absint($stats['images_scanned']),
             absint($stats['seo_title']),
@@ -460,13 +452,9 @@ if (isset($_POST['wpmazic_autofill_all_seo']) && check_admin_referer('wpmazic_au
             absint($stats['image_seo_keyword'])
         ) .
         '</p></div>';
-    }
 }
 
-if (isset($_POST['wpmazic_generate_focus_keywords']) && check_admin_referer('wpmazic_generate_focus_keywords')) {
-    if (!current_user_can('manage_options')) {
-        wpmazic_seo_lite_add_notice('error', __('Permission denied.', 'wpmazic-seo-lite'));
-    } else {
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_generate_focus_keywords', 'wpmazic_generate_focus_keywords' ) ) {
     $post_types = get_post_types(
         array(
             'public' => true,
@@ -555,14 +543,14 @@ if (isset($_POST['wpmazic_generate_focus_keywords']) && check_admin_referer('wpm
         $updated_keywords++;
     }
 
-    echo '<div class="notice notice-success is-dismissible"><p>' . sprintf(esc_html__('Focus keyword generation completed. Updated posts: %d.', 'wpmazic-seo-lite'), absint($updated_keywords)) . '</p></div>';
-    }
+    echo '<div class="notice notice-success is-dismissible"><p>' . sprintf(
+        /* translators: %d: number of posts updated */
+        esc_html__( 'Focus keyword generation completed. Updated posts: %d.', 'wpmazic-seo-lite' ),
+        absint( $updated_keywords )
+    ) . '</p></div>';
 }
 
-if (isset($_POST['wpmazic_submit_indexnow_batch']) && check_admin_referer('wpmazic_submit_indexnow_batch')) {
-    if (!current_user_can('manage_options')) {
-        wpmazic_seo_lite_add_notice('error', __('Permission denied.', 'wpmazic-seo-lite'));
-    } else {
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_submit_indexnow_batch', 'wpmazic_submit_indexnow_batch' ) ) {
     $settings = function_exists('wpmazic_seo_get_settings') ? wpmazic_seo_get_settings() : get_option('wpmazic_settings', array());
     $api_key = !empty($settings['indexnow_api_key']) ? preg_replace('/[^a-zA-Z0-9-]/', '', (string) $settings['indexnow_api_key']) : '';
 
@@ -571,7 +559,7 @@ if (isset($_POST['wpmazic_submit_indexnow_batch']) && check_admin_referer('wpmaz
     } elseif ('' === $api_key) {
         echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__('IndexNow API key is missing. Please add it in Settings first.', 'wpmazic-seo-lite') . '</p></div>';
     } else {
-        $limit = isset($_POST['wpmazic_indexnow_limit']) ? absint(wp_unslash($_POST['wpmazic_indexnow_limit'])) : 50;
+        $limit = (int) wpmazic_seo_lite_get_post_value( 'wpmazic_indexnow_limit', 'absint', 50 );
         $limit = max(1, min(500, $limit));
 
         $post_types = get_post_types(
@@ -649,15 +637,16 @@ if (isset($_POST['wpmazic_submit_indexnow_batch']) && check_admin_referer('wpmaz
             }
         }
 
-        echo '<div class="notice notice-success is-dismissible"><p>' . sprintf(esc_html__('IndexNow batch submission completed. Success: %1$d, Failed: %2$d.', 'wpmazic-seo-lite'), absint($submitted), absint($failed)) . '</p></div>';
-    }
+        echo '<div class="notice notice-success is-dismissible"><p>' . sprintf(
+            /* translators: %1$d: successful submissions, %2$d: failed submissions */
+            esc_html__( 'IndexNow batch submission completed. Success: %1$d, Failed: %2$d.', 'wpmazic-seo-lite' ),
+            absint( $submitted ),
+            absint( $failed )
+        ) . '</p></div>';
     }
 }
 
-if (isset($_POST['wpmazic_fill_image_alt']) && check_admin_referer('wpmazic_fill_image_alt')) {
-    if (!current_user_can('manage_options')) {
-        wpmazic_seo_lite_add_notice('error', __('Permission denied.', 'wpmazic-seo-lite'));
-    } else {
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_fill_image_alt', 'wpmazic_fill_image_alt' ) ) {
     $images = get_posts(
         array(
             'post_type' => 'attachment',
@@ -690,16 +679,18 @@ if (isset($_POST['wpmazic_fill_image_alt']) && check_admin_referer('wpmazic_fill
         $updated_alt++;
     }
 
-    echo '<div class="notice notice-success is-dismissible"><p>' . sprintf(esc_html__('Image ALT optimization completed. Updated images: %d.', 'wpmazic-seo-lite'), absint($updated_alt)) . '</p></div>';
-    }
+    echo '<div class="notice notice-success is-dismissible"><p>' . sprintf(
+        /* translators: %d: number of images updated */
+        esc_html__( 'Image ALT optimization completed. Updated images: %d.', 'wpmazic-seo-lite' ),
+        absint( $updated_alt )
+    ) . '</p></div>';
 }
 
-if (isset($_POST['wpmazic_rebuild_links']) && check_admin_referer('wpmazic_rebuild_links')) {
-    if (!current_user_can('manage_options')) {
-        wpmazic_seo_lite_add_notice('error', __('Permission denied.', 'wpmazic-seo-lite'));
-    } else {
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_rebuild_links', 'wpmazic_rebuild_links' ) ) {
     $table_links = wpmazic_seo_get_table_name( 'links' );
-    $wpdb->query("TRUNCATE TABLE {$table_links}"); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+    if ( wpmazic_seo_table_exists( 'links' ) ) {
+        $wpdb->query( $wpdb->prepare( 'TRUNCATE TABLE %i', $table_links ) );
+    }
 
     $post_types = get_post_types(
         array(
@@ -776,8 +767,12 @@ if (isset($_POST['wpmazic_rebuild_links']) && check_admin_referer('wpmazic_rebui
         }
     }
 
-    echo '<div class="notice notice-success is-dismissible"><p>' . sprintf(esc_html__('Internal link index rebuilt. Posts scanned: %1$d, Links stored: %2$d.', 'wpmazic-seo-lite'), absint($scanned), absint($stored_links)) . '</p></div>';
-    }
+    echo '<div class="notice notice-success is-dismissible"><p>' . sprintf(
+        /* translators: %1$d: posts scanned, %2$d: links stored */
+        esc_html__( 'Internal link index rebuilt. Posts scanned: %1$d, Links stored: %2$d.', 'wpmazic-seo-lite' ),
+        absint( $scanned ),
+        absint( $stored_links )
+    ) . '</p></div>';
 }
 
 $settings = get_option('wpmazic_settings', array());

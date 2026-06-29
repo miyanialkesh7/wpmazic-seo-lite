@@ -38,7 +38,7 @@ class WPMazic_LLMS_Txt {
 
         nocache_headers();
         header( 'Content-Type: text/plain; charset=utf-8' );
-        echo wp_strip_all_tags( $output );
+        echo esc_html( wp_strip_all_tags( $output ) );
         exit;
     }
 

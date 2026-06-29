@@ -3,66 +3,62 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
 global $wpdb;
-$table = wpmazic_seo_get_table_name( 'redirects' );
+$table_raw = wpmazic_seo_get_table_name( 'redirects' );
 
-$redirect_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+$redirect_count = wpmazic_seo_count_table_rows( 'redirects' );
 
-if ( isset( $_POST['wpmazic_add_redirect'] ) && check_admin_referer( 'wpmazic_add_redirect' ) ) {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        wpmazic_seo_lite_add_notice( 'error', __( 'Permission denied.', 'wpmazic-seo-lite' ) );
-    } else {
-        $source_raw = isset( $_POST['source'] ) ? wp_unslash( $_POST['source'] ) : '';
-        $target     = isset( $_POST['target'] ) ? wp_unslash( $_POST['target'] ) : '';
-        $type       = 301;
-        $source     = '/' . ltrim( trim( sanitize_text_field( $source_raw ) ), '/' );
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_add_redirect', 'wpmazic_add_redirect' ) ) {
+    $source_raw = (string) wpmazic_seo_lite_get_post_value( 'source', 'sanitize_text_field', '' );
+    $target     = (string) wpmazic_seo_lite_get_post_value( 'target', 'esc_url_raw', '' );
+    $type       = 301;
+    $source     = '/' . ltrim( trim( $source_raw ), '/' );
 
-        $target = esc_url_raw( trim( (string) $target ) );
+    $target = esc_url_raw( trim( (string) $target ) );
 
-        if ( '' !== trim( (string) $source ) && '' !== $target ) {
-            $exists = (int) $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT id FROM {$table} WHERE source = %s LIMIT 1",
-                    $source
-                )
+    if ( '' !== trim( (string) $source ) && '' !== $target ) {
+        $exists    = (int) $wpdb->get_var(
+            $wpdb->prepare(
+                'SELECT id FROM %i WHERE source = %s LIMIT 1',
+                $table_raw,
+                $source
+            )
+        );
+
+        if ( $exists ) {
+            wpmazic_seo_lite_add_notice( 'warning', __( 'A redirect for this source URL already exists.', 'wpmazic-seo-lite' ) );
+        } else {
+            $wpdb->insert(
+                $table_raw,
+                array(
+                    'source' => substr( (string) $source, 0, 500 ),
+                    'target' => substr( (string) $target, 0, 500 ),
+                    'type'   => $type,
+                    'status' => 'active',
+                ),
+                array( '%s', '%s', '%d', '%s' )
             );
-
-            if ( $exists ) {
-                wpmazic_seo_lite_add_notice( 'warning', __( 'A redirect for this source URL already exists.', 'wpmazic-seo-lite' ) );
-            } else {
-                $wpdb->insert(
-                    $table,
-                    array(
-                        'source' => substr( (string) $source, 0, 500 ),
-                        'target' => substr( (string) $target, 0, 500 ),
-                        'type'   => $type,
-                        'status' => 'active',
-                    ),
-                    array( '%s', '%s', '%d', '%s' )
-                );
-                $redirect_count++;
-                wpmazic_seo_lite_add_notice( 'success', __( 'Redirect added.', 'wpmazic-seo-lite' ) );
-            }
+            $redirect_count++;
+            wpmazic_seo_lite_add_notice( 'success', __( 'Redirect added.', 'wpmazic-seo-lite' ) );
         }
     }
 }
 
-if ( isset( $_POST['wpmazic_delete_redirect_id'] ) && check_admin_referer( 'wpmazic_delete_redirect' ) ) {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        wpmazic_seo_lite_add_notice( 'error', __( 'Permission denied.', 'wpmazic-seo-lite' ) );
-    } else {
-        $delete_id = isset( $_POST['wpmazic_delete_redirect_id'] ) ? absint( wp_unslash( $_POST['wpmazic_delete_redirect_id'] ) ) : 0;
-        if ( $delete_id ) {
-            $wpdb->delete( $table, array( 'id' => $delete_id ), array( '%d' ) );
-            wpmazic_seo_lite_add_notice( 'success', __( 'Redirect deleted.', 'wpmazic-seo-lite' ) );
-        }
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_delete_redirect_id', 'wpmazic_delete_redirect' ) ) {
+    $delete_id = (int) wpmazic_seo_lite_get_post_value( 'wpmazic_delete_redirect_id', 'absint', 0 );
+    if ( $delete_id ) {
+        $wpdb->delete( $table_raw, array( 'id' => $delete_id ), array( '%d' ) );
+        wpmazic_seo_lite_add_notice( 'success', __( 'Redirect deleted.', 'wpmazic-seo-lite' ) );
     }
 }
 
-$fetch_limit = 300;
-$redirects   = $wpdb->get_results(
+$fetch_limit   = 300;
+$redirects     = $wpdb->get_results(
     $wpdb->prepare(
-        "SELECT * FROM {$table} ORDER BY id DESC LIMIT %d",
+        'SELECT * FROM %i ORDER BY id DESC LIMIT %d',
+        $table_raw,
         $fetch_limit
     )
 );

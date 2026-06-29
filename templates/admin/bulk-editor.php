@@ -3,23 +3,21 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-if ( isset( $_POST['wpmazic_bulk_save'] ) && check_admin_referer( 'wpmazic_bulk_save' ) ) {
-    if ( ! current_user_can( 'manage_options' ) ) {
-        wpmazic_seo_lite_add_notice( 'error', __( 'Permission denied.', 'wpmazic-seo-lite' ) );
-    } else {
-    // SECURITY: Validate and sanitize input
-    $items_raw = isset( $_POST['items'] ) && is_array( $_POST['items'] ) ? $_POST['items'] : array();
-    $items = array();
-    
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+if ( wpmazic_seo_lite_is_verified_admin_post( 'wpmazic_bulk_save', 'wpmazic_bulk_save' ) ) {
+    // SECURITY: Validate and sanitize input as soon as it is read from POST.
+    $items_raw = wpmazic_seo_lite_get_post_array( 'items' );
+    $items     = array();
+
     if ( is_array( $items_raw ) ) {
-        // Sanitize each item in the array
         foreach ( $items_raw as $post_id => $item ) {
             $post_id = absint( $post_id );
             if ( $post_id && is_array( $item ) ) {
                 $items[ $post_id ] = array(
-                    'title'       => isset( $item['title'] ) ? sanitize_text_field( wp_unslash( $item['title'] ) ) : '',
-                    'description' => isset( $item['description'] ) ? sanitize_textarea_field( wp_unslash( $item['description'] ) ) : '',
-                    'keyword'     => isset( $item['keyword'] ) ? sanitize_text_field( wp_unslash( $item['keyword'] ) ) : '',
+                    'title'       => isset( $item['title'] ) ? sanitize_text_field( (string) $item['title'] ) : '',
+                    'description' => isset( $item['description'] ) ? sanitize_textarea_field( (string) $item['description'] ) : '',
+                    'keyword'     => isset( $item['keyword'] ) ? sanitize_text_field( (string) $item['keyword'] ) : '',
                 );
             }
         }
@@ -43,8 +41,14 @@ if ( isset( $_POST['wpmazic_bulk_save'] ) && check_admin_referer( 'wpmazic_bulk_
         $saved++;
     }
 
-    wpmazic_seo_lite_add_notice( 'success', sprintf( esc_html__( '%d posts updated.', 'wpmazic-seo-lite' ), absint( $saved ) ) );
-    }
+    wpmazic_seo_lite_add_notice(
+        'success',
+        sprintf(
+            /* translators: %d: number of posts updated */
+            esc_html__( '%d posts updated.', 'wpmazic-seo-lite' ),
+            absint( $saved )
+        )
+    );
 }
 
 $post_types = get_post_types( array( 'public' => true ), 'names' );

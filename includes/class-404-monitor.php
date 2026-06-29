@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
 class WPMazic_Monitor_404 {
 
     public function __construct() {
@@ -27,16 +29,22 @@ class WPMazic_Monitor_404 {
             return;
         }
 
-        $row = $wpdb->get_row(
+        $table_raw = wpmazic_seo_get_table_name( '404' );
+        if ( '' === $table_raw || ! wpmazic_seo_table_exists( '404' ) ) {
+            return;
+        }
+
+        $row   = $wpdb->get_row(
             $wpdb->prepare(
-                'SELECT id, hits FROM ' . wpmazic_seo_get_table_name( '404' ) . ' WHERE url = %s LIMIT 1',
+                'SELECT id, hits FROM %i WHERE url = %s LIMIT 1',
+                $table_raw,
                 $url
             )
         );
 
         if ( $row ) {
             $wpdb->update(
-                wpmazic_seo_get_table_name( '404' ),
+                $table_raw,
                 array(
                     'hits'       => (int) $row->hits + 1,
                     'last_hit'   => current_time( 'mysql' ),
@@ -52,7 +60,7 @@ class WPMazic_Monitor_404 {
         }
 
         $wpdb->insert(
-            wpmazic_seo_get_table_name( '404' ),
+            $table_raw,
             array(
                 'url'        => $url,
                 'referer'    => $referer,
