@@ -1,18 +1,41 @@
 # WPMazic SEO Lite
 
-WPMazic SEO Lite is a lightweight SEO toolkit for WordPress.
+WPMazic SEO Lite is a lightweight, performance-focused SEO toolkit for WordPress that helps you optimize your site for search engines without the bloat.
 
-It includes metadata controls, XML sitemap support, schema output, redirects, 404 monitoring, breadcrumbs, image SEO, IndexNow support, and migration tools.
+## Core Features
 
-## Highlights
+- **SEO Title & Meta Description Controls** - Customize titles and descriptions with template support
+- **Focus Keyword Analysis** - Track and optimize focus keywords per post
+- **XML Sitemap & Image Sitemap** - Automatic sitemap generation with filtering options
+- **Schema Markup** - Article, FAQ, Product, and LocalBusiness structured data
+- **Redirect Manager** - 301/302 redirects with auto-slug redirect on post changes
+- **404 Monitor** - Track broken links and crawl errors with trend analysis
+- **Open Graph & Twitter Cards** - Social preview optimization with dynamic OG image fallback
+- **Robots.txt Editor** - Built-in editor for search engine directives
+- **llms.txt Endpoint** - LLM-friendly content index for AI crawlers
+- **Bulk Editor** - Update SEO meta for multiple posts at once
+- **Migration Wizard** - 1-click import from Yoast, Rank Math, or AIOSEO
+- **Local SEO** - Business schema and location markup
+- **Breadcrumbs** - Flexible breadcrumb navigation
+- **Image SEO** - Automated alt text and filename optimization
+- **Internal Link Tracking** - Analyze internal linking structure
+- **IndexNow Integration** - Instant notification to search engines on content updates
+- **Security Tools** - Bad bot blocker, security headers, XML-RPC control
 
-- SEO title and meta description controls
-- XML sitemap and image sitemap support
-- Schema output for common content types
-- Redirect manager and 404 monitor
-- Open Graph and Twitter card support
-- Robots.txt editor and llms.txt endpoint
-- Bulk editor and migration wizard
+## Why WPMazic SEO Lite?
+
+- **Lightweight** - Minimal performance impact on your site
+- **No Tracking** - Your data stays private by default
+- **Easy Migration** - Switch from Yoast, Rank Math, or AIOSEO in one click
+- **Multisite Compatible** - Works across network installations
+- **All-in-One Solution** - Essential SEO tools without premium upsells
+
+## Quick FAQ
+
+- **No account required** - All features available immediately
+- **Performance optimized** - Minimal server impact
+- **Page builder friendly** - Works with Elementor, Divi, Gutenberg, and more
+- **Full data control** - Your SEO data stays in your WordPress database
 
 ## External services
 
@@ -31,3 +54,8 @@ WPMazic SEO Lite does not send tracking data or make external service requests b
 1. Upload the plugin folder to `/wp-content/plugins/`.
 2. Activate the plugin from the WordPress admin Plugins screen.
 3. Open the WPMazic SEO admin pages to configure site settings.
+
+## Upgrade to Pro
+
+For advanced SEO features and premium support:
+https://wpmazic.com/wpmazic-seo/

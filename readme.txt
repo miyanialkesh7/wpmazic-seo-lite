@@ -8,59 +8,52 @@ Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Core SEO toolkit for WordPress with migration wizard, metadata tools, sitemap, schema basics, redirects, and crawl helpers.
+Launch SEO fundamentals quickly with meta tags, sitemap, schema, redirects, and 404 monitoring.
 
 == Description ==
 
-WPMazic SEO Lite helps you launch SEO fundamentals quickly.
+WPMazic SEO Lite helps you launch SEO fundamentals quickly and monitor your site's search performance.
 
-**Included Free Features**
+**Complete Feature Overview**
 
 * Setup wizard + 1-click migration from Yoast, Rank Math, and AIOSEO
 * SEO title/meta controls with snippet preview for posts, pages, and custom post types
 * Focus keyword analysis and per-post SEO controls
-* XML sitemap plus image sitemap support
+* XML sitemap plus image sitemap support with filtering options
 * Schema output for common content types including Article, FAQ, Product, and LocalBusiness
 * Open Graph, Twitter Cards, dynamic OG image fallback, and author SEO enhancements
-* Redirect manager, 404 monitor, and auto slug redirect
+* Redirect manager with 301/302 redirects and auto slug redirect
 * Search engine verification tags, robots.txt editor, llms.txt editor, and IndexNow
-* Bulk editor, migration wizard, local SEO, breadcrumbs, image SEO, and internal link tools
+* Bulk editor and migration wizard for efficient content management
+* Local SEO with business schema and location markup
+* Breadcrumbs with flexible navigation structure
+* Image SEO with automated alt text and filename optimization
+* Internal link tracking to analyze linking structure
+* Security tools including bad bot blocker and security headers
 
-== External services ==
+**Why Choose WPMazic SEO Lite?**
 
-WPMazic SEO Lite does not send tracking data or make external service requests by default. External services are used only after the site owner enables the related setting or runs the related admin tool.
-
-* Google Analytics 4 / Google tag (`www.googletagmanager.com`): used to add Google Analytics 4 tracking to the public frontend. Data is sent only when the site owner enters a GA4 Measurement ID and enables "GA4 Frontend Tracking" in the plugin settings. When enabled, the plugin loads Google's `gtag.js` script in frontend page source. Google receives the configured Measurement ID, the visitor's page URL, and standard browser/request data needed to deliver analytics. This feature is off by default.
-  Terms: https://policies.google.com/terms
-  Privacy: https://policies.google.com/privacy
-* IndexNow (`api.indexnow.org`): used to notify participating search engines when site URLs are published or updated. Data is sent only when the site owner enables IndexNow in the plugin settings, or when an administrator manually runs the IndexNow batch submission tool after IndexNow is enabled. The plugin sends the site host, the submitted URL or URLs, the configured IndexNow key, and the key location URL to `https://api.indexnow.org/indexnow`. This feature is off by default.
-  Documentation: https://www.indexnow.org/documentation
-  Terms: https://www.indexnow.org/terms
-  Privacy: https://www.indexnow.org/terms
-
-== Privacy ==
-
-WPMazic SEO Lite stores plugin settings in your WordPress database.
-
-If the 404 Monitor feature is enabled, the plugin also stores the requested 404 URL, the referring URL when available, the hit count, and the last-hit timestamp for logged 404 events.
-
-If you enable features that connect to external services (see the "External services" section), your site may send data to those services as described there.
+- Lightweight and fast - minimal overhead on your site
+- No bloatware - only essential SEO features included
+- Compatible with WordPress multisite installations
+- Zero tracking by default - your data stays with you
+- Full control over social media previews with customizable OG tags
 
 == Installation ==
 
 1. Upload `wpmazic-seo-lite` to `/wp-content/plugins/`
 2. Activate from the Plugins screen in WordPress
-3. Open WPMazic SEO in admin and complete setup
+3. Follow the setup wizard to configure your SEO settings
 
 == Frequently Asked Questions ==
 
 = Does Lite include migration from Yoast/Rank Math/AIOSEO? =
 
-Yes. Use the setup wizard.
+Yes. Use the setup wizard and import your existing SEO settings seamlessly.
 
 = Where is the sitemap? =
 
-Visit `https://yourdomain.com/sitemap.xml`.
+Visit `https://yourdomain.com/sitemap.xml`. An image sitemap is available at `https://yourdomain.com/sitemap-images.xml`.
 
 = Does this package include all bundled features? =
 
@@ -70,18 +63,64 @@ Yes. The plugin includes the features bundled in this package. If you use a sepa
 
 No. Admin CSS and JS are bundled locally inside the plugin package.
 
+= How does the 404 Monitor work? =
+
+The 404 Monitor automatically logs missing URL requests with referrer and user-agent data, helping you identify broken links and redirect opportunities.
+
+= Is there a limit on redirects or 404 entries? =
+
+The Lite version includes full support for redirects and 404 monitoring without artificial limits. Your site data is stored locally in your WordPress database.
+
+= Will my website slow down if I install WPMazic SEO Lite? =
+
+No. The plugin is optimized for performance and uses minimal resources. The codebase follows WordPress best practices with efficient database queries and cached output.
+
+= Can I use this on a multisite installation? =
+
+Yes. WPMazic SEO Lite is fully compatible with WordPress multisite networks. Each site can have independent SEO settings.
+
+= Do I need to create an account to use this plugin? =
+
+No account is required. All features are available immediately after installation. The plugin works entirely within your WordPress site.
+
+= How do I get started with configuration? =
+
+After activation, follow the setup wizard to configure your site name, separator, and enable desired features. The default settings are optimized for most sites.
+
+= Can I control which post types appear in the sitemap? =
+
+Yes. The sitemap settings allow you to include or exclude specific post types and taxonomies from your XML sitemaps.
+
+= Is the plugin compatible with page builders? =
+
+Yes. WPMazic SEO Lite works with all major page builders including Elementor, Divi, WPBakery, and Gutenberg since it operates at the WordPress core level.
+
+= What happens to my SEO data if I uninstall? =
+
+Your SEO meta data is stored as custom fields in WordPress. You can optionally preserve this data during migration to another plugin.
+
 == Screenshots ==
 
-1. Dashboard overview
-2. Settings screen
-3. Tools (robots.txt + llms.txt editor)
-4. Redirect manager
-5. SEO meta box editor
+1. Dashboard overview with SEO coverage charts and quick action recommendations
+2. Settings screen with global SEO configuration and template controls
+3. Tools screen with robots.txt and llms.txt editors
+4. Redirect manager with 301/302 redirect configuration
+5. SEO meta box editor with focus keyword and preview controls
+6. SEO Analysis screen showing content optimization suggestions
+7. Bulk Editor for updating multiple posts at once
+8. 404 Monitor with trend charts and referrer data
+9. Migration Wizard for importing from other SEO plugins
+10. Local SEO business information settings
 
 == Support ==
 
 Support is handled through the plugin support forum:
 https://wordpress.org/support/plugin/wpmazic-seo-lite/
+
+== Upgrade to Pro ==
+
+For advanced SEO features and premium support, visit:
+https://wpmazic.com/wpmazic-seo/
 
 == Changelog ==
 
@@ -92,4 +131,4 @@ https://wordpress.org/support/plugin/wpmazic-seo-lite/
 == Upgrade Notice ==
 
 = 1.0.0 =
-Initial release.
+Initial release. All essential SEO features included for free.
