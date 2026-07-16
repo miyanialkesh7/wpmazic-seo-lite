@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: WPMazic SEO Lite
- * Plugin URI:  https://wordpress.org/plugins/search/wpmazic-seo-lite/
+ * Plugin URI:  https://wordpress.org/plugins/wpmazic-seo-lite/
  * Description: Lightweight SEO suite with meta tags, schema, sitemap, redirects, 404 monitor, breadcrumbs, image SEO, IndexNow, and migration tools.
- * Version:     1.0.0
+ * Version:     1.0.1
  * Author:      WPMazic
  * Author URI:  https://wpmazic.com
  * License:     GPL-2.0-or-later
@@ -319,7 +319,7 @@ if ( wpmazic_seo_lite_is_pro_active() ) {
 }
 
 if ( ! defined( 'WPMAZIC_SEO_VERSION' ) ) {
-    define( 'WPMAZIC_SEO_VERSION', '1.0.0' );
+    define( 'WPMAZIC_SEO_VERSION', '1.0.1' );
 }
 if ( ! defined( 'WPMAZIC_SEO_DB_VERSION' ) ) {
     define( 'WPMAZIC_SEO_DB_VERSION', '2.9.0' );
@@ -457,7 +457,7 @@ function wpmazic_seo_count_table_where( $table_key, $where_sql, $where_args = ar
 
     array_unshift( $where_args, $table );
 
-    // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter -- WHERE clause is internal and must include its own placeholders.
+    // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- WHERE clause is an internal, hardcoded string (never request input) and must include its own placeholders.
     return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$where_sql}", $where_args ) );
 }
 

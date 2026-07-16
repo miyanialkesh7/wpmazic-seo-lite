@@ -1,14 +1,14 @@
 === WPMazic SEO Lite ===
-Contributors: wpmazic
+Contributors: wpmazic, alkesh7
 Tags: seo, sitemap, schema, redirects, open graph
 Requires at least: 5.8
 Tested up to: 7.0
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Launch SEO fundamentals quickly with meta tags, sitemap, schema, redirects, and 404 monitoring.
+Complete SEO toolkit: meta tags, XML/image sitemaps, schema, Open Graph, redirects, 404 monitoring, and 1-click migration from Yoast/Rank Math/AIOSEO.
 
 == Description ==
 
@@ -124,11 +124,20 @@ https://wpmazic.com/wpmazic-seo/
 
 == Changelog ==
 
+= 1.0.1 =
+* Security and code review: removed a leftover legacy loader file, tightened an internal query comment, and verified escaping, nonce, and capability checks across the codebase
+* Confirmed compatibility with WordPress 7.0 and PHP 7.4-8.4
+* Added missing file and class documentation for improved code readability
+* Minor coding standards fixes
+
 = 1.0.0 =
 * Initial Lite release
 * Free-feature package with setup wizard, migration, and core SEO toolkit
 
 == Upgrade Notice ==
+
+= 1.0.1 =
+Security hardening review and WordPress 7.0 compatibility confirmation. No settings changes required.
 
 = 1.0.0 =
 Initial release. All essential SEO features included for free.
