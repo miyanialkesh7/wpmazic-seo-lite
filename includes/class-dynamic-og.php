@@ -6,30 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WPMazic_Dynamic_OG {
 
     public function __construct() {
-        add_action( 'init', array( $this, 'add_rewrite' ) );
-        add_filter( 'query_vars', array( $this, 'register_query_vars' ) );
         add_action( 'template_redirect', array( $this, 'handle_request' ) );
-    }
-
-    /**
-     * Register rewrite for dynamic SVG endpoint.
-     */
-    public function add_rewrite() {
-        add_rewrite_rule( '^wpmazic-og/([0-9]+)\.svg$', 'index.php?wpmazic_dynamic_og=1&wpmazic_dynamic_og_post=$matches[1]', 'top' );
-        add_rewrite_tag( '%wpmazic_dynamic_og%', '([0-1])' );
-        add_rewrite_tag( '%wpmazic_dynamic_og_post%', '([0-9]+)' );
-    }
-
-    /**
-     * Register query vars.
-     *
-     * @param array $vars Existing vars.
-     * @return array
-     */
-    public function register_query_vars( $vars ) {
-        $vars[] = 'wpmazic_dynamic_og';
-        $vars[] = 'wpmazic_dynamic_og_post';
-        return $vars;
     }
 
     /**

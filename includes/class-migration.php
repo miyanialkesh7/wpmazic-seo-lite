@@ -27,12 +27,12 @@ class WPMazic_Migration {
     }
 
     /**
-     * Detect active SEO plugins.
+     * Source check definitions mapping slugs to plugin files, classes, and options.
      *
      * @return array
      */
-    public static function get_detected_sources() {
-        $checks = array(
+    private static function get_source_check_definitions() {
+        return array(
             'yoast' => array(
                 'plugins' => array( 'wordpress-seo/wp-seo.php', 'wordpress-seo-premium/wp-seo-premium.php' ),
                 'class'   => 'WPSEO_Options',
@@ -84,7 +84,15 @@ class WPMazic_Migration {
                 'option'  => 'psp_opts',
             ),
         );
+    }
 
+    /**
+     * Detect active SEO plugins.
+     *
+     * @return array
+     */
+    public static function get_detected_sources() {
+        $checks   = self::get_source_check_definitions();
         $detected = array();
         foreach ( $checks as $slug => $check ) {
             if ( self::is_source_detected( $check ) ) {
@@ -93,6 +101,28 @@ class WPMazic_Migration {
         }
 
         return $detected;
+    }
+
+    /**
+     * Return the first active plugin file for a given set of source slugs.
+     *
+     * @param array $source_slugs Source slugs (e.g. array( 'yoast' )).
+     * @return string Plugin basename, or empty string.
+     */
+    public static function get_plugin_file_for_source( $source_slugs ) {
+        $checks = self::get_source_check_definitions();
+        foreach ( $source_slugs as $slug ) {
+            $slug = sanitize_key( (string) $slug );
+            if ( ! isset( $checks[ $slug ]['plugins'] ) ) {
+                continue;
+            }
+            foreach ( (array) $checks[ $slug ]['plugins'] as $plugin_file ) {
+                if ( function_exists( 'is_plugin_active' ) && is_plugin_active( $plugin_file ) ) {
+                    return $plugin_file;
+                }
+            }
+        }
+        return '';
     }
 
     /**

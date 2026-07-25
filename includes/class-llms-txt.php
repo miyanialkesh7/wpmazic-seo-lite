@@ -6,16 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WPMazic_LLMS_Txt {
 
     public function __construct() {
-        add_action( 'init', array( $this, 'register_rewrite' ) );
         add_action( 'template_redirect', array( $this, 'serve_llms_txt' ) );
-    }
-
-    /**
-     * Register rewrite rule and query var.
-     */
-    public function register_rewrite() {
-        add_rewrite_rule( '^llms\.txt$', 'index.php?wpmazic_llms_txt=1', 'top' );
-        add_rewrite_tag( '%wpmazic_llms_txt%', '([0-1])' );
     }
 
     /**
