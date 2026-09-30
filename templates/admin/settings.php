@@ -104,6 +104,11 @@ $settings_updated = (string) wpmazic_seo_lite_get_get_value( 'settings-updated',
                 'enable_image_sitemap'      => __( 'Image Sitemap', 'wpmazic-seo-lite' ),
                 'enable_auto_slug_redirect' => __( 'Auto Redirect on Slug Change', 'wpmazic-seo-lite' ),
                 'enable_dynamic_og_image'   => __( 'Dynamic OG Image Fallback', 'wpmazic-seo-lite' ),
+                'enable_search_ping'        => __( 'Search Engine Ping', 'wpmazic-seo-lite' ),
+                'enable_reading_time'       => __( 'Reading Time Badge', 'wpmazic-seo-lite' ),
+                'enable_author_box'         => __( 'Author Bio Box', 'wpmazic-seo-lite' ),
+                'enable_html_sitemap'       => __( 'HTML Sitemap (shortcode)', 'wpmazic-seo-lite' ),
+                'enable_auto_internal_links' => __( 'Auto Internal Links', 'wpmazic-seo-lite' ),
             );
 
             $feature_groups = array(
@@ -126,6 +131,7 @@ $settings_updated = (string) wpmazic_seo_lite_get_get_value( 'settings-updated',
                         'enable_image_sitemap',
                         'enable_indexnow',
                         'enable_llms_txt',
+                        'enable_search_ping',
                     ),
                 ),
                 array(
@@ -136,6 +142,16 @@ $settings_updated = (string) wpmazic_seo_lite_get_get_value( 'settings-updated',
                         'enable_404_monitor',
                         'enable_auto_slug_redirect',
                         'enable_dynamic_og_image',
+                    ),
+                ),
+                array(
+                    'title'       => __( 'Content & Engagement', 'wpmazic-seo-lite' ),
+                    'description' => __( 'On-page enhancements to improve reader experience and internal linking.', 'wpmazic-seo-lite' ),
+                    'fields'      => array(
+                        'enable_reading_time',
+                        'enable_author_box',
+                        'enable_html_sitemap',
+                        'enable_auto_internal_links',
                     ),
                 ),
             );
@@ -457,6 +473,56 @@ $settings_updated = (string) wpmazic_seo_lite_get_get_value( 'settings-updated',
                 <input class="wmz-input" type="text" id="business_lng" name="wpmazic_settings[business_lng]" value="<?php echo esc_attr( isset( $settings['business_lng'] ) ? $settings['business_lng'] : '' ); ?>">
             </div>
         </div>
+    </div>
+
+    <div class="wmz-card">
+        <h2><?php esc_html_e( 'Auto Internal Link Rules', 'wpmazic-seo-lite' ); ?>
+            <span class="wmz-pill" style="vertical-align:middle;"><?php esc_html_e( 'Lite: 5 rules max', 'wpmazic-seo-lite' ); ?></span>
+        </h2>
+        <p class="wmz-subtle"><?php esc_html_e( 'Define keyword to URL pairs. When enabled, WPMazic will auto-link the keyword to the target URL in post content (max 3 links per post in Lite).', 'wpmazic-seo-lite' ); ?></p>
+
+        <?php
+        $link_rules = isset( $settings['auto_internal_link_rules'] ) && is_array( $settings['auto_internal_link_rules'] )
+            ? $settings['auto_internal_link_rules']
+            : array();
+        if ( empty( $link_rules ) ) {
+            $link_rules = array( array( 'keyword' => '', 'url' => '' ) );
+        }
+        $link_rules = array_slice( $link_rules, 0, 5 );
+        ?>
+
+        <div class="wmz-table-wrap tw-mt-3">
+            <table class="wp-list-table widefat striped" id="wmz-auto-link-rules">
+                <thead>
+                    <tr>
+                        <th style="width:40%;"><?php esc_html_e( 'Keyword', 'wpmazic-seo-lite' ); ?></th>
+                        <th style="width:50%;"><?php esc_html_e( 'Target URL', 'wpmazic-seo-lite' ); ?></th>
+                        <th style="width:10%;"><?php esc_html_e( 'Action', 'wpmazic-seo-lite' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ( $link_rules as $i => $rule ) : ?>
+                        <tr>
+                            <td>
+                                <input type="text" class="wmz-input" name="wpmazic_settings[auto_internal_link_rules][<?php echo esc_attr( $i ); ?>][keyword]"
+                                    value="<?php echo esc_attr( isset( $rule['keyword'] ) ? $rule['keyword'] : '' ); ?>"
+                                    placeholder="<?php esc_attr_e( 'e.g., SEO tools', 'wpmazic-seo-lite' ); ?>">
+                            </td>
+                            <td>
+                                <input type="url" class="wmz-input" name="wpmazic_settings[auto_internal_link_rules][<?php echo esc_attr( $i ); ?>][url]"
+                                    value="<?php echo esc_attr( isset( $rule['url'] ) ? $rule['url'] : '' ); ?>"
+                                    placeholder="<?php esc_attr_e( 'https://', 'wpmazic-seo-lite' ); ?>">
+                            </td>
+                            <td>
+                                <button type="button" class="button button-small wmz-remove-rule" <?php echo count( $link_rules ) <= 1 ? 'disabled' : ''; ?>><?php esc_html_e( 'Remove', 'wpmazic-seo-lite' ); ?></button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <?php wpmazic_seo_lite_upgrade_notice( 'auto_internal_links' ); ?>
     </div>
 
     <div class="wmz-actions">

@@ -88,6 +88,8 @@ class WPMazic_Schema {
         if ( empty( $schema_type ) || 'default' === $schema_type ) {
             if ( 'product' === $post->post_type ) {
                 $schema_type = 'Product';
+            } elseif ( 'page' === $post->post_type ) {
+                $schema_type = 'WebPage';
             } elseif ( in_array( $post->post_type, array( 'job_listing', 'job', 'jobs' ), true ) ) {
                 $schema_type = 'JobPosting';
             } elseif ( in_array( $post->post_type, array( 'course', 'courses', 'sfwd-courses' ), true ) ) {

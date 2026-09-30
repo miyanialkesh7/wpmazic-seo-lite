@@ -190,15 +190,18 @@ $posts_sql         = "
 $posts = $wpdb->get_results( $wpdb->prepare( $posts_sql, $post_types ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 $missing_alt_images = (int) $wpdb->get_var(
-    "SELECT COUNT(*)
-     FROM {$wpdb->posts} p
-     LEFT JOIN {$wpdb->postmeta} pm
-       ON p.ID = pm.post_id
-      AND pm.meta_key = '_wp_attachment_image_alt'
-     WHERE p.post_type = 'attachment'
-       AND p.post_status = 'inherit'
-       AND p.post_mime_type LIKE 'image/%'
-       AND (pm.meta_id IS NULL OR pm.meta_value = '')"
+    $wpdb->prepare(
+        "SELECT COUNT(*)
+         FROM {$wpdb->posts} p
+         LEFT JOIN {$wpdb->postmeta} pm
+           ON p.ID = pm.post_id
+          AND pm.meta_key = %s
+         WHERE p.post_type = 'attachment'
+           AND p.post_status = 'inherit'
+           AND p.post_mime_type LIKE 'image/%'
+           AND (pm.meta_id IS NULL OR pm.meta_value = '')",
+        '_wp_attachment_image_alt'
+    )
 );
 $cornerstone_count = (int) $wpdb->get_var(
     $wpdb->prepare(

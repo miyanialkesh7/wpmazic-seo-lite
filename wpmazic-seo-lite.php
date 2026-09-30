@@ -611,7 +611,32 @@ function wpmazic_seo_get_default_settings() {
         'indexnow_api_key'     => wp_generate_password( 32, false ),
         'breadcrumb_separator' => '/',
         'breadcrumb_home_text' => 'Home',
+        'enable_search_ping'      => 0,
+        'enable_reading_time'     => 1,
+        'enable_author_box'       => 1,
+        'enable_html_sitemap'     => 1,
+        'enable_auto_internal_links' => 0,
+        'auto_internal_link_rules' => array(),
     );
+}
+
+/**
+ * Render a small upgrade notice for Lite-limited features.
+ *
+ * @param string $feature Feature key for the limit.
+ * @return void
+ */
+function wpmazic_seo_lite_upgrade_notice() {
+    $pro_url = esc_url( wpmazic_seo_lite_pro_url() );
+    echo '<p class="wmz-help" style="color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:0.4rem 0.6rem;margin-top:0.5rem;font-size:0.8rem;">';
+    echo wp_kses(
+        sprintf(
+            __( 'Available in Lite with limits. Unlock unlimited access in <a href="%s" target="_blank" rel="noopener noreferrer" style="font-weight:600;color:#0369a1;">WPMazic SEO Pro</a>.', 'wpmazic-seo-lite' ),
+            $pro_url
+        ),
+        array( 'a' => array( 'href' => array(), 'target' => array(), 'rel' => array(), 'style' => array() ) )
+    );
+    echo '</p>';
 }
 
 /**
@@ -705,8 +730,67 @@ function wpmazic_seo_activate( $show_wizard = true ) {
     if ( $show_wizard ) {
         update_option( 'wpmazic_show_migration_wizard', 1 );
     }
+
+    // Register rewrite rules before flushing so the rules are persisted.
+    if ( function_exists( 'wpmazic_seo_register_rewrite_rules' ) ) {
+        wpmazic_seo_register_rewrite_rules();
+    }
     flush_rewrite_rules();
 }
+// -------------------------------------------------------------------------
+// Register rewrite rules early so activation flush captures them.
+// -------------------------------------------------------------------------
+function wpmazic_seo_register_rewrite_rules() {
+    // Use `/?$` instead of `$` to survive WordPress trailing-slash redirects.
+    $rules = array(
+        '^sitemap\.xml/?$'                              => 'index.php?wpmazic_sitemap=1',
+        '^image-sitemap\.xml/?$'                        => 'index.php?wpmazic_image_sitemap=1',
+        '^wpmazic-og/([0-9]+)\.svg/?$'                  => 'index.php?wpmazic_dynamic_og=1&wpmazic_dynamic_og_post=$matches[1]',
+        '^indexnow-key/([A-Za-z0-9-]+)\.txt/?$'         => 'index.php?wpmazic_indexnow_key=$matches[1]',
+        '^llms\.txt/?$'                                 => 'index.php?wpmazic_llms_txt=1',
+    );
+
+    foreach ( $rules as $regex => $query ) {
+        add_rewrite_rule( $regex, $query, 'top' );
+    }
+
+    add_rewrite_tag( '%wpmazic_sitemap%', '([^&]+)' );
+    add_rewrite_tag( '%wpmazic_image_sitemap%', '([0-1])' );
+    add_rewrite_tag( '%wpmazic_dynamic_og%', '([0-1])' );
+    add_rewrite_tag( '%wpmazic_dynamic_og_post%', '([0-9]+)' );
+    add_rewrite_tag( '%wpmazic_indexnow_key%', '([A-Za-z0-9-]+)' );
+    add_rewrite_tag( '%wpmazic_llms_txt%', '([0-1])' );
+}
+
+function wpmazic_seo_register_query_vars( $vars ) {
+    $vars[] = 'wpmazic_sitemap';
+    $vars[] = 'wpmazic_image_sitemap';
+    $vars[] = 'wpmazic_dynamic_og';
+    $vars[] = 'wpmazic_dynamic_og_post';
+    $vars[] = 'wpmazic_indexnow_key';
+    $vars[] = 'wpmazic_llms_txt';
+    return $vars;
+}
+add_filter( 'query_vars', 'wpmazic_seo_register_query_vars' );
+
+// Run rewrite registration on init (priority 0 = before class constructors).
+add_action( 'init', 'wpmazic_seo_register_rewrite_rules', 0 );
+
+/**
+ * Disable core WordPress sitemaps when our sitemap is active.
+ */
+add_filter(
+    'wp_sitemaps_enabled',
+    function ( $enabled ) {
+        static $checked;
+        if ( null === $checked ) {
+            $settings = function_exists( 'wpmazic_seo_get_settings' ) ? wpmazic_seo_get_settings() : array();
+            $checked  = ! empty( $settings['enable_sitemap'] );
+        }
+        return $checked ? false : $enabled;
+    }
+);
+
 register_activation_hook( __FILE__, 'wpmazic_seo_activate' );
 
 register_deactivation_hook(
@@ -730,6 +814,11 @@ require_once WPMAZIC_SEO_PATH . 'includes/class-security.php';
 require_once WPMAZIC_SEO_PATH . 'includes/class-meta-tags.php';
 require_once WPMAZIC_SEO_PATH . 'includes/class-sitemap.php';
 require_once WPMAZIC_SEO_PATH . 'includes/class-schema.php';
+require_once WPMAZIC_SEO_PATH . 'includes/class-search-ping.php';
+require_once WPMAZIC_SEO_PATH . 'includes/class-blog-enhancements.php';
+require_once WPMAZIC_SEO_PATH . 'includes/class-html-sitemap.php';
+require_once WPMAZIC_SEO_PATH . 'includes/class-auto-internal-links.php';
+require_once WPMAZIC_SEO_PATH . 'includes/class-seo-score.php';
 
 $wpmazic_feature_files = array(
     'includes/class-redirects.php',
@@ -789,7 +878,8 @@ add_action(
             new WPMazic_Image_SEO();
         }
 
-        if ( class_exists( 'WPMazic_IndexNow' ) && ( ! isset( $settings['enable_indexnow'] ) || ! empty( $settings['enable_indexnow'] ) ) ) {
+        // Always instantiate — the handler checks the setting internally.
+        if ( class_exists( 'WPMazic_IndexNow' ) ) {
             new WPMazic_IndexNow();
         }
 
@@ -823,6 +913,26 @@ add_action(
 
         if ( class_exists( 'WPMazic_Dynamic_OG' ) ) {
             new WPMazic_Dynamic_OG();
+        }
+
+        if ( class_exists( 'WPMazic_Search_Ping' ) ) {
+            new WPMazic_Search_Ping();
+        }
+
+        if ( class_exists( 'WPMazic_Blog_Enhancements' ) ) {
+            new WPMazic_Blog_Enhancements();
+        }
+
+        if ( class_exists( 'WPMazic_HTML_Sitemap' ) ) {
+            new WPMazic_HTML_Sitemap();
+        }
+
+        if ( class_exists( 'WPMazic_Auto_Internal_Links' ) ) {
+            new WPMazic_Auto_Internal_Links();
+        }
+
+        if ( class_exists( 'WPMazic_SEO_Score' ) ) {
+            new WPMazic_SEO_Score();
         }
     }
 );
@@ -885,20 +995,118 @@ if ( is_admin() ) {
                 );
             }
 
+            $migration_badge = '';
+            if ( function_exists( 'wpmazic_seo_should_show_migration_prompt' ) && wpmazic_seo_should_show_migration_prompt() ) {
+                $detected       = wpmazic_seo_get_detected_sources();
+                $count          = count( $detected );
+                $migration_badge = sprintf(
+                    ' <span class="awaiting-mod update-plugins count-%1$d"><span class="pending-count" aria-hidden="true">%1$d</span><span class="screen-reader-text">%2$s</span></span>',
+                    absint( $count ),
+                    esc_attr__( 'SEO plugins detected — run migration', 'wpmazic-seo-lite' )
+                );
+            }
+
             add_submenu_page(
                 'wpmazic-seo',
                 __( 'WPMazic SEO Migration Wizard', 'wpmazic-seo-lite' ),
-                __( 'Migration Wizard', 'wpmazic-seo-lite' ),
+                __( 'Migration Wizard', 'wpmazic-seo-lite' ) . $migration_badge,
                 'manage_options',
                 'wpmazic-seo-migration-wizard',
                 function () {
                     wpmazic_seo_render_admin_template( 'migration-wizard.php' );
                 }
             );
-            remove_submenu_page( 'wpmazic-seo', 'wpmazic-seo-migration-wizard' );
+
+            add_submenu_page(
+                'wpmazic-seo',
+                __( 'WPMazic SEO Pro Features', 'wpmazic-seo-lite' ),
+                __( 'Pro Features', 'wpmazic-seo-lite' ),
+                'manage_options',
+                'wpmazic-seo-pro-features',
+                function () {
+                    wpmazic_seo_render_admin_template( 'pro-features.php' );
+                }
+            );
         }
     );
 
+    /**
+     * Check if any supported third-party SEO plugins are active.
+     *
+     * @return array Detected source slugs.
+     */
+    function wpmazic_seo_get_detected_sources() {
+        if ( ! class_exists( 'WPMazic_Migration' ) ) {
+            return array();
+        }
+
+        return WPMazic_Migration::get_detected_sources();
+    }
+
+    /**
+     * Whether a supported third-party SEO plugin is active and migration
+     * has not been completed yet.
+     *
+     * @return bool
+     */
+    function wpmazic_seo_should_show_migration_prompt() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            return false;
+        }
+
+        $detected = wpmazic_seo_get_detected_sources();
+        if ( empty( $detected ) ) {
+            return false;
+        }
+
+        return ! get_option( 'wpmazic_migration_wizard_completed' );
+    }
+
+    // Admin notice banner — persistent while other SEO plugins remain active.
+    add_action(
+        'admin_notices',
+        function () {
+            if ( ! wpmazic_seo_should_show_migration_prompt() ) {
+                return;
+            }
+
+            $page = wpmazic_seo_lite_get_admin_page_query();
+            if ( 'wpmazic-seo-migration-wizard' === $page ) {
+                return;
+            }
+
+            $detected = wpmazic_seo_get_detected_sources();
+            $sources  = class_exists( 'WPMazic_Migration' ) ? WPMazic_Migration::get_supported_sources() : array();
+            $labels   = array();
+            foreach ( $detected as $slug ) {
+                if ( isset( $sources[ $slug ] ) ) {
+                    $labels[] = $sources[ $slug ];
+                }
+            }
+
+            $wizard_url = admin_url( 'admin.php?page=wpmazic-seo-migration-wizard' );
+            ?>
+            <div class="notice notice-warning is-dismissible wpmazic-migration-notice">
+                <p>
+                    <strong><?php esc_html_e( 'WPMazic SEO Lite', 'wpmazic-seo-lite' ); ?>:</strong>
+                    <?php
+                    echo wp_kses(
+                        sprintf(
+                            /* translators: %s: detected SEO plugin names */
+                            __( 'We detected %s on your site. <a href="%s">Run the Migration Wizard</a> to move your SEO metadata into WPMazic before deactivating the old plugin.', 'wpmazic-seo-lite' ),
+                            esc_html( implode( ', ', $labels ) ),
+                            esc_url( $wizard_url )
+                        ),
+                        array( 'a' => array( 'href' => array() ) )
+                    );
+                    ?>
+                </p>
+            </div>
+            <?php
+        }
+    );
+
+    // Redirect to wizard on activation, but only when other SEO plugins are detected.
     add_action(
         'admin_init',
         function () {
@@ -907,6 +1115,14 @@ if ( is_admin() ) {
             }
 
             if ( ! get_option( 'wpmazic_show_migration_wizard' ) ) {
+                return;
+            }
+
+            // Only redirect if a supported third-party plugin is actually present.
+            $detected = wpmazic_seo_get_detected_sources();
+            if ( empty( $detected ) ) {
+                delete_option( 'wpmazic_show_migration_wizard' );
+                update_option( 'wpmazic_migration_wizard_completed', current_time( 'mysql' ) );
                 return;
             }
 
@@ -1237,6 +1453,7 @@ function wpmazic_seo_render_admin_template( $template ) {
         'dashboard.php',
         'local-seo.php',
         'migration-wizard.php',
+        'pro-features.php',
         'redirects.php',
         'settings.php',
         'tools.php',

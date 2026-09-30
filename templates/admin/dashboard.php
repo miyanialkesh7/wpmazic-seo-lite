@@ -305,6 +305,45 @@ wpmazic_seo_admin_shell_open(
     </div>
 </div>
 
+<?php
+// Migration / import banner — shown when other SEO plugins are detected.
+$wmz_detected_sources = function_exists( 'wpmazic_seo_should_show_migration_prompt' ) && wpmazic_seo_should_show_migration_prompt()
+    ? ( function_exists( 'wpmazic_seo_get_detected_sources' ) ? wpmazic_seo_get_detected_sources() : array() )
+    : array();
+
+if ( ! empty( $wmz_detected_sources ) && class_exists( 'WPMazic_Migration' ) ) :
+    $wmz_sources = WPMazic_Migration::get_supported_sources();
+    $wmz_labels  = array();
+    foreach ( $wmz_detected_sources as $slug ) {
+        if ( isset( $wmz_sources[ $slug ] ) ) {
+            $wmz_labels[] = $wmz_sources[ $slug ];
+        }
+    }
+    ?>
+    <div class="wmz-card" style="border-left:4px solid #f59e0b;">
+        <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+            <div>
+                <h2 class="tw-mb-1"><?php esc_html_e( 'SEO Plugin Migration Available', 'wpmazic-seo-lite' ); ?></h2>
+                <p class="wmz-subtle tw-mb-0">
+                    <?php
+                    echo wp_kses(
+                        sprintf(
+                            /* translators: %s: detected plugin names */
+                            __( 'We detected %s on your site. Run the Migration Wizard to bring existing SEO metadata into WPMazic.', 'wpmazic-seo-lite' ),
+                            esc_html( implode( ', ', $wmz_labels ) )
+                        ),
+                        array()
+                    );
+                    ?>
+                </p>
+            </div>
+            <a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=wpmazic-seo-migration-wizard' ) ); ?>">
+                <?php esc_html_e( 'Run Migration Wizard', 'wpmazic-seo-lite' ); ?>
+            </a>
+        </div>
+    </div>
+<?php endif; ?>
+
 <div class="wmz-card">
     <h2><?php esc_html_e('Getting Started', 'wpmazic-seo-lite'); ?></h2>
     <div class="tw-grid md:tw-grid-cols-3 tw-gap-4 tw-text-sm">
@@ -372,6 +411,35 @@ wpmazic_seo_admin_shell_open(
             </div>
         <?php endforeach; ?>
     </div>
+</div>
+
+<div class="wmz-card">
+    <h2><?php esc_html_e( 'Unlock More with WPMazic SEO Pro', 'wpmazic-seo-lite' ); ?></h2>
+    <p class="wmz-subtle"><?php esc_html_e( 'Remove Lite limits and access premium SEO tools designed for agencies and growing sites.', 'wpmazic-seo-lite' ); ?></p>
+    <div class="tw-grid md:tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-3 tw-mt-3">
+        <div class="tw-rounded-lg tw-border tw-border-slate-200 tw-bg-slate-50 tw-p-3">
+            <p class="tw-font-semibold tw-text-sm tw-text-slate-900"><?php esc_html_e( 'Auto Internal Links', 'wpmazic-seo-lite' ); ?></p>
+            <p class="tw-text-xs tw-text-slate-600 tw-mt-1"><?php esc_html_e( 'Unlimited links per post &amp; unlimited rules.', 'wpmazic-seo-lite' ); ?></p>
+        </div>
+        <div class="tw-rounded-lg tw-border tw-border-slate-200 tw-bg-slate-50 tw-p-3">
+            <p class="tw-font-semibold tw-text-sm tw-text-slate-900"><?php esc_html_e( 'HTML Sitemap', 'wpmazic-seo-lite' ); ?></p>
+            <p class="tw-text-xs tw-text-slate-600 tw-mt-1"><?php esc_html_e( 'Unlimited items &amp; taxonomy sections.', 'wpmazic-seo-lite' ); ?></p>
+        </div>
+        <div class="tw-rounded-lg tw-border tw-border-slate-200 tw-bg-slate-50 tw-p-3">
+            <p class="tw-font-semibold tw-text-sm tw-text-slate-900"><?php esc_html_e( 'SEO Score', 'wpmazic-seo-lite' ); ?></p>
+            <p class="tw-text-xs tw-text-slate-600 tw-mt-1"><?php esc_html_e( 'Keyword density, readability, &amp; full recommendations.', 'wpmazic-seo-lite' ); ?></p>
+        </div>
+        <div class="tw-rounded-lg tw-border tw-border-slate-200 tw-bg-slate-50 tw-p-3">
+            <p class="tw-font-semibold tw-text-sm tw-text-slate-900"><?php esc_html_e( 'Search Ping', 'wpmazic-seo-lite' ); ?></p>
+            <p class="tw-text-xs tw-text-slate-600 tw-mt-1"><?php esc_html_e( 'Ping Google/Bing on every update, not just new posts.', 'wpmazic-seo-lite' ); ?></p>
+        </div>
+    </div>
+    <p class="tw-mt-3">
+        <a href="<?php echo esc_url( wpmazic_seo_lite_pro_url() ); ?>" target="_blank" rel="noopener noreferrer" class="button button-primary">
+            <?php esc_html_e( 'Learn More About Pro', 'wpmazic-seo-lite' ); ?> &rarr;
+        </a>
+        <span class="wmz-help tw-ml-2"><?php esc_html_e( 'More features: Video Sitemap, News Sitemap, Hreflang, Term SEO, WooCommerce SEO, SEO Revisions, and more.', 'wpmazic-seo-lite' ); ?></span>
+    </p>
 </div>
 
 <?php wpmazic_seo_admin_shell_close(); ?>

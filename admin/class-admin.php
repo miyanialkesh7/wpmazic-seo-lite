@@ -187,6 +187,11 @@ class WPMazic_Admin
             'enable_security_block_author_enum',
             'sitemap_post_types_filter_enabled',
             'sitemap_taxonomies_filter_enabled',
+            'enable_search_ping',
+            'enable_reading_time',
+            'enable_author_box',
+            'enable_html_sitemap',
+            'enable_auto_internal_links',
         );
         foreach ($toggles as $toggle) {
             $clean[$toggle] = isset($settings[$toggle]) && absint($settings[$toggle]) ? 1 : 0;
@@ -286,6 +291,26 @@ class WPMazic_Admin
         // --- Robots meta (textarea) ----------------------------------------
         if (isset($settings['robots_meta'])) {
             $clean['robots_meta'] = WPMazic_Security::sanitize_textarea($settings['robots_meta']);
+        }
+
+        // --- Auto internal link rules --------------------------------------
+        if ( isset( $settings['auto_internal_link_rules'] ) && is_array( $settings['auto_internal_link_rules'] ) ) {
+            $max_rules = 5;
+            $rules     = array();
+            foreach ( array_slice( $settings['auto_internal_link_rules'], 0, $max_rules ) as $rule ) {
+                if ( ! is_array( $rule ) ) {
+                    continue;
+                }
+                $keyword = isset( $rule['keyword'] ) ? sanitize_text_field( $rule['keyword'] ) : '';
+                $url     = isset( $rule['url'] ) ? esc_url_raw( $rule['url'] ) : '';
+                if ( '' !== $keyword && '' !== $url ) {
+                    $rules[] = array(
+                        'keyword' => $keyword,
+                        'url'     => $url,
+                    );
+                }
+            }
+            $clean['auto_internal_link_rules'] = $rules;
         }
 
         /**
@@ -795,10 +820,15 @@ class WPMazic_Admin
         global $wpdb;
 
         // Delete all transients with the wpmazic_ prefix.
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Literal SQL, no user input.
         $wpdb->query(
-            "DELETE FROM {$wpdb->options}
-             WHERE option_name LIKE '_transient_wpmazic\_%'
-                OR option_name LIKE '_transient_timeout_wpmazic\_%'"
+            $wpdb->prepare(
+                "DELETE FROM {$wpdb->options}
+                 WHERE option_name LIKE %s
+                    OR option_name LIKE %s",
+                $wpdb->esc_like( '_transient_wpmazic_' ) . '%',
+                $wpdb->esc_like( '_transient_timeout_wpmazic_' ) . '%'
+            )
         );
 
         // Allow other plugin modules to flush their own caches.

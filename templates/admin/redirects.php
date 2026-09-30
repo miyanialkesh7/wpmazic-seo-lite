@@ -98,11 +98,11 @@ wpmazic_seo_admin_shell_open(
         <table class="wp-list-table widefat striped">
             <thead>
                 <tr>
-                    <th><?php esc_html_e( 'Source', 'wpmazic-seo-lite' ); ?></th>
-                    <th><?php esc_html_e( 'Target', 'wpmazic-seo-lite' ); ?></th>
-                    <th><?php esc_html_e( 'Type', 'wpmazic-seo-lite' ); ?></th>
-                    <th><?php esc_html_e( 'Hits', 'wpmazic-seo-lite' ); ?></th>
-                    <th><?php esc_html_e( 'Action', 'wpmazic-seo-lite' ); ?></th>
+                    <th class="wmz-col-source"><?php esc_html_e( 'Source', 'wpmazic-seo-lite' ); ?></th>
+                    <th class="wmz-col-target"><?php esc_html_e( 'Target', 'wpmazic-seo-lite' ); ?></th>
+                    <th class="wmz-col-type"><?php esc_html_e( 'Type', 'wpmazic-seo-lite' ); ?></th>
+                    <th class="wmz-col-hits"><?php esc_html_e( 'Hits', 'wpmazic-seo-lite' ); ?></th>
+                    <th class="wmz-col-action"><?php esc_html_e( 'Action', 'wpmazic-seo-lite' ); ?></th>
                 </tr>
             </thead>
             <tbody>

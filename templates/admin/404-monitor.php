@@ -51,11 +51,11 @@ wpmazic_seo_admin_shell_open(
         <table class="wp-list-table widefat striped">
             <thead>
                 <tr>
-                    <th><?php esc_html_e( 'URL', 'wpmazic-seo-lite' ); ?></th>
-                    <th><?php esc_html_e( 'Referer', 'wpmazic-seo-lite' ); ?></th>
-                    <th><?php esc_html_e( 'Hits', 'wpmazic-seo-lite' ); ?></th>
-                    <th><?php esc_html_e( 'Last Hit', 'wpmazic-seo-lite' ); ?></th>
-                    <th><?php esc_html_e( 'Action', 'wpmazic-seo-lite' ); ?></th>
+                    <th class="wmz-col-url"><?php esc_html_e( 'URL', 'wpmazic-seo-lite' ); ?></th>
+                    <th class="wmz-col-ref"><?php esc_html_e( 'Referer', 'wpmazic-seo-lite' ); ?></th>
+                    <th class="wmz-col-hits"><?php esc_html_e( 'Hits', 'wpmazic-seo-lite' ); ?></th>
+                    <th class="wmz-col-last"><?php esc_html_e( 'Last Hit', 'wpmazic-seo-lite' ); ?></th>
+                    <th class="wmz-col-action"><?php esc_html_e( 'Action', 'wpmazic-seo-lite' ); ?></th>
                 </tr>
             </thead>
             <tbody>

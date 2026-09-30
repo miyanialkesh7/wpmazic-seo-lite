@@ -15,28 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WPMazic_Image_Sitemap {
 
     public function __construct() {
-        add_action( 'init', array( $this, 'add_rewrite' ) );
-        add_filter( 'query_vars', array( $this, 'register_query_vars' ) );
         add_action( 'template_redirect', array( $this, 'handle_request' ) );
-    }
-
-    /**
-     * Register rewrite endpoint.
-     */
-    public function add_rewrite() {
-        add_rewrite_rule( '^image-sitemap\.xml$', 'index.php?wpmazic_image_sitemap=1', 'top' );
-        add_rewrite_tag( '%wpmazic_image_sitemap%', '([0-1])' );
-    }
-
-    /**
-     * Register query vars.
-     *
-     * @param array $vars Existing query vars.
-     * @return array
-     */
-    public function register_query_vars( $vars ) {
-        $vars[] = 'wpmazic_image_sitemap';
-        return $vars;
     }
 
     /**

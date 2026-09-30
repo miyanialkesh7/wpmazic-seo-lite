@@ -5,10 +5,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
-if ( ! current_user_can( 'manage_options' ) ) {
-    wp_die( esc_html__( 'You are not allowed to access this page.', 'wpmazic-seo-lite' ) );
-}
-
 $dashboard_url = wpmazic_seo_admin_page_url( 'dashboard' );
 $skip_url      = wp_nonce_url(
     add_query_arg(
@@ -233,6 +229,34 @@ wpmazic_seo_admin_shell_open(
                 <div class="wmz-stat"><p class="wmz-stat-label"><?php esc_html_e( 'Robots Flags', 'wpmazic-seo-lite' ); ?></p><p class="wmz-stat-value"><?php echo esc_html( (string) ( (int) $result['noindex'] + (int) $result['nofollow'] + (int) $result['noarchive'] + (int) $result['nosnippet'] + (int) $result['noimageindex'] ) ); ?></p></div>
                 <div class="wmz-stat"><p class="wmz-stat-label"><?php esc_html_e( 'Image Meta', 'wpmazic-seo-lite' ); ?></p><p class="wmz-stat-value"><?php echo esc_html( (string) ( ( isset( $result['image_alt'] ) ? (int) $result['image_alt'] : 0 ) + ( isset( $result['image_title'] ) ? (int) $result['image_title'] : 0 ) + ( isset( $result['image_caption'] ) ? (int) $result['image_caption'] : 0 ) + ( isset( $result['image_description'] ) ? (int) $result['image_description'] : 0 ) + ( isset( $result['image_seo_title'] ) ? (int) $result['image_seo_title'] : 0 ) + ( isset( $result['image_seo_description'] ) ? (int) $result['image_seo_description'] : 0 ) + ( isset( $result['image_seo_keyword'] ) ? (int) $result['image_seo_keyword'] : 0 ) ) ); ?></p></div>
             </div>
+
+            <?php
+            // Offer to deactivate the source plugin when specific plugins were detected.
+            $source_slugs = isset( $result['source_slugs'] ) && is_array( $result['source_slugs'] ) ? $result['source_slugs'] : array();
+            if ( empty( $source_slugs ) && ! empty( $result['source'] ) && 'auto' !== $result['source'] ) {
+                $source_slugs = array( $result['source'] );
+            }
+            $deactivate_nonce = false;
+            $deactivate_url   = '';
+            if ( ! empty( $source_slugs ) && class_exists( 'WPMazic_Migration' ) ) {
+                $plugin_file = WPMazic_Migration::get_plugin_file_for_source( $source_slugs );
+                if ( '' !== $plugin_file ) {
+                    $deactivate_nonce = wp_create_nonce( 'deactivate-plugin_' . $plugin_file );
+                    $deactivate_url   = admin_url( 'plugins.php?action=deactivate&plugin=' . rawurlencode( $plugin_file ) . '&plugin_status=all&paged=1&s&_wpnonce=' . $deactivate_nonce );
+                }
+            }
+            ?>
+
+            <?php if ( '' !== $deactivate_url ) : ?>
+                <div class="notice notice-info inline tw-mt-3">
+                    <p>
+                        <?php esc_html_e( 'Your SEO data has been imported. You can now safely deactivate the old plugin to avoid conflicts.', 'wpmazic-seo-lite' ); ?>
+                        <a href="<?php echo esc_url( $deactivate_url ); ?>" class="button button-primary tw-ml-3" style="vertical-align:baseline;">
+                            <?php esc_html_e( 'Deactivate old SEO plugin', 'wpmazic-seo-lite' ); ?>
+                        </a>
+                    </p>
+                </div>
+            <?php endif; ?>
         <?php else : ?>
             <p class="wmz-subtle"><?php esc_html_e( 'No migration run found in this session. Start again from step 1 when you are ready to import metadata.', 'wpmazic-seo-lite' ); ?></p>
         <?php endif; ?>

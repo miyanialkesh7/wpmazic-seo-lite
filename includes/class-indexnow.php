@@ -25,24 +25,24 @@ class WPMazic_IndexNow {
         $settings  = wpmazic_seo_get_settings();
         $this->key = ! empty( $settings['indexnow_api_key'] ) ? preg_replace( '/[^a-zA-Z0-9-]/', '', (string) $settings['indexnow_api_key'] ) : '';
 
-        add_action( 'init', array( $this, 'register_rewrite' ) );
-        add_action( 'template_redirect', array( $this, 'serve_key_file' ) );
+        add_action( 'template_redirect', array( $this, 'serve_key_file' ), 1 );
         add_action( 'transition_post_status', array( $this, 'submit_on_publish' ), 10, 3 );
-    }
-
-    /**
-     * Register query var for key endpoint.
-     */
-    public function register_rewrite() {
-        add_rewrite_rule( '^indexnow-key/([A-Za-z0-9-]+)\.txt$', 'index.php?wpmazic_indexnow_key=$matches[1]', 'top' );
-        add_rewrite_tag( '%wpmazic_indexnow_key%', '([A-Za-z0-9-]+)' );
     }
 
     /**
      * Respond with plaintext key.
      */
     public function serve_key_file() {
+        // Check rewrite-rule query var first, then fall back to REQUEST_URI
+        // (redirect_canonical may add a trailing slash before our rule matches).
         $requested = get_query_var( 'wpmazic_indexnow_key' );
+        if ( empty( $requested ) && ! empty( $this->key ) ) {
+            $path = isset( $_SERVER['REQUEST_URI'] ) ? strtok( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), '?' ) : '';
+            if ( preg_match( '#^/indexnow-key/([A-Za-z0-9-]+)\.txt(?:/)?$#', $path, $m ) ) {
+                $requested = $m[1];
+            }
+        }
+
         if ( empty( $requested ) || empty( $this->key ) ) {
             return;
         }
